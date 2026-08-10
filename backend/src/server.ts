@@ -3,6 +3,7 @@ import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import { Server } from 'http';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
 import authRoutes from './routes/authRoutes';
 import gameRoutes from './routes/gameRoutes';
@@ -30,7 +31,7 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const gameLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 120, // limit each IP to 120 game actions per minute
+  max: process.env.NODE_ENV === 'production' ? 120 : 5000,
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => process.env.NODE_ENV === 'test',
@@ -42,7 +43,7 @@ export const gameLimiter: RateLimitRequestHandler = rateLimit({
  */
 export const publicLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300,
+  max: process.env.NODE_ENV === 'production' ? 300 : 5000,
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => process.env.NODE_ENV === 'test',
@@ -80,6 +81,9 @@ function createCorsOptions(): CorsOptions {
  */
 export const createApp = (): Express => {
   const app: Express = express();
+
+  // Apply HTTP Gzip / Deflate payload compression
+  app.use(compression());
 
   // Apply Security Headers via Helmet
   app.use(

@@ -165,4 +165,21 @@
   .hud-badge {
     @apply border-3 border-neo-black shadow-neo px-4 py-2 font-mono font-bold flex items-center gap-2;
   }
+
+  /* Virtualizzazione Nativa CSS per layout super-veloce su pagine lunghe */
+  .wiki-section-body {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 120px;
+  }
+
+  /* Intestazione Sezione / Accordion Neo-Brutalista */
+  .wiki-section-btn {
+    @apply w-full text-left bg-neo-surface text-neo-black font-space font-bold text-base sm:text-lg
+           border-2 border-neo-black shadow-neo-sm
+           p-3 my-2 flex justify-between items-center
+           hover:bg-neo-yellow hover:text-neo-on-accent
+           active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-black
+           transition-all duration-75 select-none cursor-pointer;
+  }
 }

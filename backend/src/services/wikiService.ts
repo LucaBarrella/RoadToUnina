@@ -275,7 +275,7 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedAttributes: {
     '*': ['class', 'id', 'style', 'title', 'lang', 'dir', 'data-title'],
     'a': ['href', 'title', 'target', 'data-title', 'class'],
-    'img': ['src', 'alt', 'width', 'height', 'srcset'],
+    'img': ['src', 'alt', 'width', 'height', 'srcset', 'loading', 'decoding'],
   },
   allowedSchemes: ['http', 'https', 'data'],
   exclusiveFilter: (frame) => {
@@ -295,6 +295,16 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     return false;
   },
   transformTags: {
+    'img': (_tagName: string, attribs: sanitizeHtml.Attributes): sanitizeHtml.Tag => {
+      return {
+        tagName: 'img',
+        attribs: {
+          ...attribs,
+          loading: 'lazy',
+          decoding: 'async',
+        },
+      };
+    },
     'a': (_tagName: string, attribs: sanitizeHtml.Attributes): sanitizeHtml.Tag => {
       const href = attribs['href'] || '';
       const className = attribs['class'] || '';
