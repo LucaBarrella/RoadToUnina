@@ -1,0 +1,168 @@
+:root {
+  /* Neo-Brutalist Light Mode Palette */
+  --color-neo-bg: #fff9e9;
+  --color-neo-surface: #ffffff;
+  --color-neo-surface-dim: #dadada;
+  --color-neo-surface-low: #f3f3f3;
+  --color-neo-surface-container: #eeeeee;
+  --color-neo-surface-high: #e8e8e8;
+  --color-neo-surface-highest: #d1d1d1;
+  --color-neo-black: #1b1b1b;
+  --color-neo-text: #1b1b1b;
+  --color-neo-text-muted: #3f3f46;
+  --color-neo-border: #1b1b1b;
+  --shadow-neo-color: #1b1b1b;
+  --color-dot-pattern: #1b1b1b;
+
+  /* Accents */
+  --color-neo-yellow: #ffe600;
+  --color-neo-cyan: #00e3fd;
+  --color-neo-pink: #ff2e93;
+  --color-neo-green: #10b981;
+  --color-neo-on-accent: #1b1b1b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Neo-Brutalist Dark Mode Palette */
+    --color-neo-bg: #121214;
+    --color-neo-surface: #1a1a1e;
+    --color-neo-surface-dim: #161619;
+    --color-neo-surface-low: #141416;
+    --color-neo-surface-container: #232328;
+    --color-neo-surface-high: #2c2c32;
+    --color-neo-surface-highest: #383840;
+    --color-neo-black: #f4f4f5;
+    --color-neo-text: #f4f4f5;
+    --color-neo-text-muted: #d4d4d8;
+    --color-neo-border: #f4f4f5;
+    --shadow-neo-color: #000000;
+    --color-dot-pattern: rgba(244, 244, 245, 0.15);
+
+    /* Accents */
+    --color-neo-yellow: #ffd600;
+    --color-neo-cyan: #00e3fd;
+    --color-neo-pink: #ff2e93;
+    --color-neo-green: #10b981;
+    --color-neo-on-accent: #1b1b1b;
+  }
+}
+
+.dark,
+[data-theme="dark"] {
+  /* Class-based Dark Mode Override */
+  --color-neo-bg: #121214;
+  --color-neo-surface: #1a1a1e;
+  --color-neo-surface-dim: #161619;
+  --color-neo-surface-low: #141416;
+  --color-neo-surface-container: #232328;
+  --color-neo-surface-high: #2c2c32;
+  --color-neo-surface-highest: #383840;
+  --color-neo-black: #f4f4f5;
+  --color-neo-text: #f4f4f5;
+  --color-neo-text-muted: #d4d4d8;
+  --color-neo-border: #f4f4f5;
+  --shadow-neo-color: #000000;
+  --color-dot-pattern: rgba(244, 244, 245, 0.15);
+
+  /* Accents */
+  --color-neo-yellow: #ffd600;
+  --color-neo-cyan: #00e3fd;
+  --color-neo-pink: #ff2e93;
+  --color-neo-green: #10b981;
+  --color-neo-on-accent: #1b1b1b;
+}
+
+@layer utilities {
+  .bg-dot-pattern {
+    background-image: radial-gradient(var(--color-dot-pattern, #1b1b1b) 1.2px, transparent 1.2px);
+    background-size: 16px 16px;
+  }
+}
+
+@layer components {
+  /* Contenitore Card Neo-Brutalista */
+  .card-neo {
+    @apply bg-neo-surface text-neo-black border-3 border-neo-black shadow-neo transition-all;
+  }
+
+  .card-neo-yellow {
+    @apply bg-neo-yellow text-neo-on-accent border-3 border-neo-black shadow-neo transition-all;
+  }
+
+  .card-neo-cyan {
+    @apply bg-neo-cyan text-neo-on-accent border-3 border-neo-black shadow-neo transition-all;
+  }
+
+  .card-neo-pink {
+    @apply bg-neo-pink text-neo-on-accent border-3 border-neo-black shadow-neo transition-all;
+  }
+
+  /* Bottoni Neo-Brutalisti con Feedback Tattile e Focus Visibile WCAG */
+  .btn-neo-primary {
+    @apply bg-neo-yellow text-neo-on-accent font-space font-bold uppercase tracking-wide
+           border-3 border-neo-black shadow-neo
+           px-6 py-3 min-h-[44px]
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-neo-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-black focus-visible:ring-offset-2
+           transition-all duration-75 select-none inline-flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-neo-secondary {
+    @apply bg-neo-cyan text-neo-on-accent font-space font-bold uppercase tracking-wide
+           border-3 border-neo-black shadow-neo
+           px-6 py-3 min-h-[44px]
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-neo-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-black focus-visible:ring-offset-2
+           transition-all duration-75 select-none inline-flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-neo-danger {
+    @apply bg-neo-pink text-neo-on-accent font-space font-bold uppercase tracking-wide
+           border-3 border-neo-black shadow-neo
+           px-6 py-3 min-h-[44px]
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-neo-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-black focus-visible:ring-offset-2
+           transition-all duration-75 select-none inline-flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-neo-success {
+    @apply bg-neo-green text-neo-on-accent font-space font-bold uppercase tracking-wide
+           border-3 border-neo-black shadow-neo
+           px-6 py-3 min-h-[44px]
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-neo-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-black focus-visible:ring-offset-2
+           transition-all duration-75 select-none inline-flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  .btn-neo-outline {
+    @apply bg-neo-surface text-neo-black font-space font-bold uppercase tracking-wide
+           border-3 border-neo-black shadow-neo
+           px-6 py-3 min-h-[44px]
+           hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-neo-sm
+           active:translate-x-[4px] active:translate-y-[4px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-black focus-visible:ring-offset-2
+           transition-all duration-75 select-none inline-flex items-center justify-center gap-2 cursor-pointer;
+  }
+
+  /* Chip Interattivo per Link Wikipedia */
+  .wiki-chip,
+  .wiki-content a {
+    @apply bg-neo-yellow text-neo-on-accent font-bold
+           border-2 border-neo-black shadow-neo-sm
+           px-2.5 py-1 mx-1 my-0.5 inline-flex items-center gap-1 rounded-none
+           hover:bg-neo-cyan hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-neo
+           active:translate-x-[2px] active:translate-y-[2px] active:shadow-none
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-black focus-visible:bg-neo-cyan
+           transition-all duration-75 cursor-pointer no-underline;
+  }
+
+  /* Badge HUD */
+  .hud-badge {
+    @apply border-3 border-neo-black shadow-neo px-4 py-2 font-mono font-bold flex items-center gap-2;
+  }
+}

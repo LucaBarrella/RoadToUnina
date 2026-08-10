@@ -1,0 +1,31 @@
+# Dependency directories
+node_modules/
+*/node_modules/
+
+# Build and distribution output
+dist/
+*/dist/
+build/
+*/build/
+
+# Environment and Secret files
+.env
+.env.*
+!.env.example
+*.env.local
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# Test reports & coverage
+playwright-report/
+*/playwright-report/
+test-results/
+*/test-results/
+coverage/
+
+# IDE & Editor caches
+.vscode/
+.idea/
+*.tsbuildinfo

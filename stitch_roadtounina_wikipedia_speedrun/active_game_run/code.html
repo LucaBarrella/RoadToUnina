@@ -1,0 +1,306 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>RoadToUnina - Active Run</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500;700;800&amp;family=Space+Grotesk:wght@400;700;900&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#dadada",
+                    "surface-container-high": "#e8e8e8",
+                    "secondary": "#006875",
+                    "on-primary-fixed-variant": "#504700",
+                    "secondary-fixed": "#9cf0ff",
+                    "on-surface-variant": "#4b4731",
+                    "primary-container": "#ffe600",
+                    "on-secondary-fixed": "#001f24",
+                    "background": "#f9f9f9",
+                    "on-tertiary-fixed-variant": "#8e004c",
+                    "primary-fixed": "#fde400",
+                    "inverse-primary": "#dec800",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1b1b1b",
+                    "surface-container": "#eeeeee",
+                    "on-tertiary-container": "#c7006d",
+                    "on-primary": "#ffffff",
+                    "tertiary-container": "#ffdce5",
+                    "surface-container-low": "#f3f3f3",
+                    "outline": "#7c775f",
+                    "surface-bright": "#f9f9f9",
+                    "tertiary-fixed-dim": "#ffb0c9",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#201c00",
+                    "primary-fixed-dim": "#dec800",
+                    "outline-variant": "#cdc7aa",
+                    "surface-container-highest": "#e2e2e2",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed-variant": "#004f58",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e2e2e2",
+                    "on-tertiary-fixed": "#3e001e",
+                    "inverse-on-surface": "#f1f1f1",
+                    "secondary-container": "#00e3fd",
+                    "inverse-surface": "#303030",
+                    "secondary-fixed-dim": "#00daf3",
+                    "tertiary": "#b90066",
+                    "on-secondary-container": "#00616d",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#6a5f00",
+                    "on-background": "#1b1b1b",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#726600",
+                    "surface": "#f9f9f9",
+                    "primary": "#6a5f00",
+                    "tertiary-fixed": "#ffd9e3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "stack-gap": "24px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "32px"
+            },
+            "fontFamily": {
+                    "headline-lg": [
+                            "Space Grotesk"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "headline-xl": [
+                            "Space Grotesk"
+                    ],
+                    "stats-lg": [
+                            "JetBrains Mono"
+                    ],
+                    "headline-lg-mobile": [
+                            "Space Grotesk"
+                    ],
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "label-caps": [
+                            "JetBrains Mono"
+                    ]
+            },
+            "fontSize": {
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "0.01em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-xl": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "stats-lg": [
+                            "24px",
+                            {
+                                    "lineHeight": "1",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "28px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "1",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+        },
+        }
+      }
+    </script>
+<style>
+        /* Neo-Brutalist Dot Pattern */
+        body {
+            background-image: radial-gradient(#1b1b1b 1px, transparent 1px);
+            background-size: 16px 16px;
+            background-color: #f9f9f9;
+        }
+        
+        .brutal-shadow {
+            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+        }
+        
+        .brutal-shadow:active {
+            box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+            transform: translate(4px, 4px);
+        }
+        
+        .brutal-border {
+            border: 3px solid #1b1b1b;
+        }
+
+        .wiki-link {
+            background-color: #ffe600;
+            border: 2px solid #1b1b1b;
+            padding: 2px 8px;
+            font-weight: 700;
+            display: inline-block;
+            margin: 2px;
+            box-shadow: 2px 2px 0px 0px #1b1b1b;
+            transition: all 0.1s;
+        }
+        
+        .wiki-link:hover {
+            background-color: #00e3fd;
+            transform: translate(-1px, -1px);
+            box-shadow: 3px 3px 0px 0px #1b1b1b;
+        }
+        
+        .wiki-link:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px 0px #1b1b1b;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col">
+<!-- Top Navigation (HUD) -->
+<header class="bg-surface border-b-[3px] border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center px-margin-desktop py-4 w-full sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<span class="font-headline-lg text-headline-lg font-black uppercase tracking-tighter text-on-surface">RoadToUnina</span>
+</div>
+<div class="flex items-center gap-6 font-label-caps text-label-caps">
+<div class="flex flex-col items-end">
+<span class="text-on-surface-variant font-bold">CURRENT:</span>
+<span class="bg-secondary-container px-2 py-1 brutal-border brutal-shadow font-bold mt-1">Ancient Rome</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="text-on-surface-variant font-bold">TARGET:</span>
+<span class="bg-primary-container px-2 py-1 brutal-border brutal-shadow font-bold mt-1">Università Federico II</span>
+</div>
+<div class="bg-tertiary text-on-tertiary px-8 py-3 brutal-border brutal-shadow flex items-center gap-3 scale-110 origin-right">
+<span class="material-symbols-outlined">timer</span>
+<span class="font-stats-lg text-stats-lg tracking-widest text-primary-container">02:45</span>
+</div>
+<div class="bg-on-surface text-surface px-6 py-3 brutal-border brutal-shadow flex items-center gap-3 scale-110 origin-right">
+<span class="material-symbols-outlined">ads_click</span>
+<span class="font-stats-lg text-stats-lg text-secondary-container">5</span>
+</div>
+</div>
+</header>
+<!-- Main Workspace Grid -->
+<main class="flex-1 max-w-[1600px] mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-stack-gap p-margin-desktop items-start">
+<!-- Wikipedia Content Canvas (75%) -->
+<article class="md:col-span-9 bg-surface-container-lowest brutal-border brutal-shadow p-8 flex flex-col gap-6">
+<div class="border-b-[3px] border-on-surface pb-4 mb-4 flex justify-between items-end">
+<h1 class="font-headline-xl text-headline-xl font-black">Ancient Rome</h1>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Article Data Loaded</span>
+</div>
+<div class="float-right ml-6 mb-6 w-72 brutal-border bg-surface-container-low p-4">
+<img class="w-full h-auto brutal-border mb-4 block" data-alt="A neo-brutalist styled illustration of the Roman Colosseum, vibrant cyan and yellow duotone, thick black outlines, Pop-art aesthetic, highly stylized, flat geometry." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCicR5aFPxStAJgzt1-0JachgnSaQeXOQLe15rhSH2jeaap2ll9K2ATLJsQacgz387tTS3FSth8LqEynwhJans1TFidGnAaptae06RK3ctH74l6G61kK10izIdgIZUO6iUCpJXO3drDA3UMG1SFyaC4EaVAGOH7y2lDN1ZSGUiCZOEMmVP9nC-hn8JcdDf1StNEF4YaHGL1kctVFlQnikHG2ImmreHT_ef3RZssjYMeZiOzRaaGL_9n">
+<h3 class="font-headline-lg text-headline-lg-mobile font-bold text-center border-b-[3px] border-on-surface pb-2 mb-2">Rome</h3>
+<ul class="font-body-sm text-body-sm flex flex-col gap-2">
+<li class="flex justify-between border-b border-on-surface pb-1"><strong>Capital:</strong> <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Rome</a></li>
+<li class="flex justify-between border-b border-on-surface pb-1"><strong>Language:</strong> <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Latin</a></li>
+<li class="flex justify-between border-b border-on-surface pb-1"><strong>Region:</strong> <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Italy</a></li>
+</ul>
+</div>
+<p class="font-body-md text-body-md leading-relaxed text-justify">
+                In historiography, <strong>Ancient Rome</strong> is Roman civilization from the founding of the city of <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Rome</a> in the 8th century BC to the collapse of the <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Western Roman Empire</a> in the 5th century AD. It encompasses the Roman Kingdom (753–509 BC), <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Roman Republic</a> (509–27 BC) and <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Roman Empire</a> (27 BC–476 AD) until the fall of the western empire.
+            </p>
+<p class="font-body-md text-body-md leading-relaxed text-justify mt-4">
+                The civilization began as an <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Italic settlement</a> in the <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Italian Peninsula</a>, traditionally dated to 753 BC, that grew into the city of Rome and which subsequently gave its name to the empire over which it ruled and to the widespread civilization the empire developed. The <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Roman Empire</a> expanded to become one of the largest empires in the ancient world, though still ruled from the city, with an estimated 50 to 90 million inhabitants (roughly 20% of the world's population at the time) and covering 5.0 million square kilometres at its height in AD 117.
+            </p>
+<h2 class="font-headline-lg text-headline-lg font-bold border-b-[3px] border-on-surface pb-2 mt-8 mb-4">Legacy</h2>
+<p class="font-body-md text-body-md leading-relaxed text-justify">
+                Ancient Roman civilization has contributed to modern language, religion, society, technology, law, politics, government, warfare, art, literature, architecture, and engineering. Rome professionalized and expanded its military and created a system of government called <em>res publica</em>, the inspiration for modern <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">republics</a> such as the <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">United States</a> and <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">France</a>.
+            </p>
+<p class="font-body-md text-body-md leading-relaxed text-justify mt-4">
+                The influence of Rome is profoundly visible in the educational institutions founded centuries later across Europe, notably in regions like <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Campania</a> and cities such as <a class="bg-primary-container px-2" href="#" style="background-color: rgb(255, 249, 196); border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; box-shadow: none; text-decoration: underline; font-weight: 700; transition: 0.2s;">Naples</a>, which became vital centers of learning during the Middle Ages and the Renaissance.
+            </p>
+</article>
+<!-- Right Sidebar - Game HUD (25%) -->
+<aside class="md:col-span-3 flex flex-col gap-stack-gap sticky top-32">
+<div class="bg-surface-container-low brutal-border brutal-shadow p-6 flex flex-col h-full min-h-[400px]">
+<h3 class="font-headline-lg text-headline-lg-mobile font-bold border-b-[3px] border-on-surface pb-3 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">route</span>
+                    Path Traversed
+                </h3>
+<div class="flex-1 flex flex-col gap-0 relative">
+<!-- Vertical Line connecting nodes -->
+<div class="absolute left-4 top-4 bottom-4 w-[3px] bg-on-surface z-0"></div>
+<!-- Nodes -->
+<div class="relative z-10 flex items-start gap-4 mb-6 opacity-60">
+<div class="w-8 h-8 rounded-full brutal-border bg-surface-container-highest flex items-center justify-center font-label-caps text-label-caps font-bold">1</div>
+<div class="pt-1">
+<span class="font-label-caps text-label-caps font-bold block mb-1">START</span>
+<span class="bg-surface px-2 py-1 brutal-border inline-block text-body-sm">Ancient Rome</span>
+</div>
+</div>
+<div class="relative z-10 flex items-start gap-4 mb-6 opacity-60">
+<div class="w-8 h-8 rounded-full brutal-border bg-surface-container-highest flex items-center justify-center font-label-caps text-label-caps font-bold">2</div>
+<div class="pt-1">
+<span class="font-label-caps text-label-caps font-bold block mb-1">00:45</span>
+<span class="bg-surface px-2 py-1 brutal-border inline-block text-body-sm">Italy</span>
+</div>
+</div>
+<div class="relative z-10 flex items-start gap-4 mb-6 opacity-60">
+<div class="w-8 h-8 rounded-full brutal-border bg-surface-container-highest flex items-center justify-center font-label-caps text-label-caps font-bold">3</div>
+<div class="pt-1">
+<span class="font-label-caps text-label-caps font-bold block mb-1">01:20</span>
+<span class="bg-surface px-2 py-1 brutal-border inline-block text-body-sm">Naples</span>
+</div>
+</div>
+<div class="relative z-10 flex items-start gap-4">
+<div class="w-8 h-8 rounded-full brutal-border bg-primary-container flex items-center justify-center font-label-caps text-label-caps font-black animate-pulse">4</div>
+<div class="pt-1">
+<span class="font-label-caps text-label-caps font-bold block mb-1 text-primary">CURRENT</span>
+<span class="bg-secondary-container px-2 py-1 brutal-border brutal-shadow inline-block text-body-sm font-bold">Ancient Rome</span>
+<div class="text-label-caps text-error font-bold mt-1 animate-pulse">Loop Detected!</div>
+</div>
+</div>
+</div>
+<button class="w-full bg-tertiary text-on-tertiary font-headline-lg text-headline-lg-mobile font-black mt-8 brutal-border brutal-shadow hover:bg-error transition-colors uppercase tracking-wider flex justify-center items-center gap-2 py-6">
+<span class="material-symbols-outlined">warning</span>
+                    Abandon Run
+                </button>
+</div>
+</aside>
+</main>
+
+
+</body></html>

@@ -1,0 +1,15 @@
+@import "./styles/neo-brutalism.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styling tweaks */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
