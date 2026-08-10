@@ -1,15 +1,14 @@
 # 🚀 RoadToUnina — Back-end API
 
-[![Università Federico II](https://img.shields.io/badge/Università-Federico%20II%20di%20Napoli-blue?logo=academia&logoColor=white)](https://www.unina.it/)
-[![Corso](https://img.shields.io/badge/Corso-Tecnologie%20Web%20(Spring%202026)-0052CC)](../REQUIREMENTS.md)
-[![Autore](https://img.shields.io/badge/Studente-Luca%20Barrella%20(N86004677)-success)](#-progetto--studente)
-[![PostgreSQL 18](https://img.shields.io/badge/Database-PostgreSQL%2018-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Tests](https://img.shields.io/badge/Tests-50%2F50%20Passing%20(100%25)-44A833?logo=vitest&logoColor=white)](#-esecuzione-dei-test-automatizzati)
+[![Live API](https://img.shields.io/badge/Live_API-Render.com-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://roadtounina-backend.onrender.com/api/public/leaderboard)
+[![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![Vitest Tests](https://img.shields.io/badge/Vitest-53%2F53%20Passing%20(100%25)-44A833?style=for-the-badge&logo=vitest&logoColor=white)](#-esecuzione-dei-test-automatizzati)
 
-API RESTful per la piattaforma di speedrunning enciclopedico **RoadToUnina** sviluppata con **Node.js**, **Express 5**, **TypeScript**, **Prisma ORM** e **PostgreSQL 18** (driver `pg` / `@prisma/adapter-pg`).
+API RESTful per la piattaforma di speedrunning enciclopedico **RoadToUnina** sviluppata con **Node.js**, **Express 5**, **TypeScript**, **Prisma ORM v7** e **PostgreSQL** (driver `@prisma/adapter-pg` con Supabase connection pooling).
 
 > 📄 **Requisiti d'Esame:** [REQUIREMENTS.md](../REQUIREMENTS.md)  
-> 📖 **Specifiche Architetturali:** [ARCHITECTURE.md](./ARCHITECTURE.md) (Diagrammi UML, Casi d'Uso, Macchina a Stati, ER, Sequenza, OCC & Anti-Cheat)
+> 📖 **Specifiche Architetturali:** [ARCHITECTURE.md](./ARCHITECTURE.md) (Diagrammi UML, Casi d'Uso, Macchina a Stati, ER, Sequenza, OCC & Anti-Cheat)  
+> 🔍 **Walkthrough Codice:** [CODE_WALKTHROUGH.md](./CODE_WALKTHROUGH.md) (Analisi approfondita dei sorgenti backend)
 
 ---
 
@@ -22,9 +21,7 @@ API RESTful per la piattaforma di speedrunning enciclopedico **RoadToUnina** svi
 
 ---
 
-## 🐳 1. Avvio Rapido con Docker Compose (Raccomandato)
-
-La modalità di esecuzione tramite **Docker Compose** è la procedura consigliata e più rapida:
+## 🐳 1. Avvio con Docker Compose (Locale)
 
 ```bash
 # Dalla radice del progetto:
@@ -32,81 +29,40 @@ docker compose up --build
 ```
 
 - **Backend REST API:** `http://localhost:3001`
-- **Database PostgreSQL 18:** `localhost:5432`
-- **Frontend SPA (Nginx):** `http://localhost:80` (o `http://localhost:5173`)
-
-Per arrestare i container:
-```bash
-docker compose down -v
-```
+- **Database PostgreSQL:** `localhost:5432`
+- **Frontend SPA:** `http://localhost:5173` (o `http://localhost:80`)
 
 ---
 
 ## 💻 2. Esecuzione Locale (Development)
 
-Per eseguire il solo server backend in locale:
-
-### Prerequisiti
-- **Node.js** v20.x o superiore
-- **npm** v10.x o superiore
-- Container PostgreSQL 18 attivo (`docker compose up db -d` dalla radice) oppure istanza PostgreSQL 18 locale.
-
-### Passaggi:
 ```bash
-# 1. Posizionati nella directory backend
 cd backend
-
-# 2. Installa le dipendenze
 npm install
-
-# 3. Sincronizza lo schema Prisma con PostgreSQL 18
 npx prisma generate
 npx prisma db push
-
-# 4. Avvia il server in modalità sviluppo con hot-reloading
+npx prisma db seed   # Popola 10 utenti e 20 partite storiche
 npm run dev
 ```
 
-Il server sarà attivo e in ascolto su: **`http://localhost:3001`**.
+Il server sarà attivo su: **`http://localhost:3001`**.
 
 ---
 
 ## 🧪 Esecuzione dei Test Automatizzati
 
-Il backend include **50 test automatizzati** (unitari, di integrazione, concorrenza e sicurezza):
+Il backend include **53 test automatizzati** (unitari, di integrazione, concorrenza, anti-cheat e sicurezza):
 
 ```bash
-# Esecuzione della suite completa
+cd backend
 npm test
-
-# Esecuzione interattiva in watch mode
-npx vitest
-
-# Esecuzione con report di copertura
-npx vitest run --coverage
 ```
 
----
-
-## ⚙️ Variabili d'Ambiente (`.env`)
-
-Crea un file `.env` all'interno della cartella `backend/` con i seguenti parametri:
-
-```env
-PORT=3001
-DATABASE_URL="postgresql://postgres:postgrespassword@localhost:5432/roadtounina?schema=public"
-JWT_SECRET="roadtounina_super_secret_jwt_key_2026"
-NODE_ENV="development"
-ALLOWED_ORIGINS="http://localhost:5173,http://localhost:3000,http://localhost:80"
-```
-
-| Variabile | Default | Descrizione |
-| :--- | :--- | :--- |
-| `PORT` | `3001` | Porta TCP di ascolto del server Express. |
-| `DATABASE_URL` | `postgresql://...` | Stringa di connessione PostgreSQL 18. |
-| `JWT_SECRET` | `...` | Chiave crittografica per la firma dei token JWT. |
-| `NODE_ENV` | `development` | Ambiente di runtime (`development`, `production`, `test`). |
-| `ALLOWED_ORIGINS`| `...` | Whitelist domini autorizzati CORS. |
+### Dettaglio Suite:
+- **`robustnessQA.test.ts` (25 test):** Validazione Zod, anti-cheat su Wikipedia, isolamento IDOR, race condition atomiche, timeout 24h.
+- **`breakBackend.test.ts` (12 test):** Stress test (20 req simultanee), SQL injection, DoS protection, XSS filtering, JWT security.
+- **`wikiService.test.ts` (8 test):** Parsing MediaWiki, estrazione link Namespace 0, DOM sanitization, caching LRU.
+- **`gameService.test.ts` (8 test):** Ciclo di vita del gioco, transizioni di stato atomiche, vittoria e calcolo path.
 
 ---
 
@@ -123,12 +79,3 @@ ALLOWED_ORIGINS="http://localhost:5173,http://localhost:3000,http://localhost:80
 | `POST` | `/api/games/:id/abandon` | Protetto | Forfeit / abbandono manuale della partita attiva. |
 | `GET` | `/api/public/completed-games` | Pubblico | Storico partite concluse con percorso e tempi. |
 | `GET` | `/api/public/leaderboard` | Pubblico | Classifica globale dei migliori giocatori. |
-
----
-
-## 📜 Script Disponibili (`package.json`)
-
-- `npm run dev`: Avvia il server in modalità watch con `tsx`.
-- `npm run build`: Compila il codice TypeScript nella cartella `dist/`.
-- `npm run start`: Esegue il server compilato in produzione (`node dist/server.js`).
-- `npm test`: Esegue la suite di test Vitest (50 test).

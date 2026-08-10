@@ -1,142 +1,108 @@
-# 🚀 Guida al Deployment Gratuito — RoadToUnina
+# 🚀 Guida al Deployment & CI/CD — RoadToUnina
 
-Questa guida descrive la procedura completa, trasparente e passo-passo per pubblicare l'intera applicazione **RoadToUnina** (Frontend React + Backend Express + Database PostgreSQL) online su piattaforme **100% Gratuite (Zero Costi)** ad alte prestazioni.
+Questa guida descrive l'architettura di deployment in produzione, la pipeline di **Continuous Integration / Continuous Deployment (CI/CD)** e come avvengono gli aggiornamenti automatici a ogni `git push`.
 
 ---
 
-## 🏗️ Architettura di Deployment
+## 🌐 Link Ufficiali di Produzione
+
+| Servizio | Piattaforma Cloud | URL Live |
+| :--- | :--- | :--- |
+| **🖥️ Frontend SPA** | **Vercel** | **[`https://road-to-unina.vercel.app`](https://road-to-unina.vercel.app)** |
+| **⚙️ Backend REST API** | **Render.com** | **[`https://roadtounina-backend.onrender.com/api`](https://roadtounina-backend.onrender.com/api)** |
+| **🗄️ Cloud Database** | **Supabase** | `aws-0-eu-north-1.pooler.supabase.com` (PostgreSQL 16) |
+
+---
+
+## 🔄 Come Avvengono gli Aggiornamenti Automatici (Git Push)
+
+Quando effettui modifiche al codice e le invii su GitHub:
+
+```bash
+git add .
+git commit -m "feat: aggiornamento applicazione"
+git push origin main
+```
+
+Si attivano automaticamente **3 processi in parallelo**:
 
 ```mermaid
-graph LR
-    User([🌐 Utente / Browser]) -->|HTTPS / SPA| Vercel[⚡ Vercel / Netlify<br/>Frontend React Vite]
-    Vercel -->|REST API /api| Render[🛠️ Render.com<br/>Backend Node.js / Express]
-    Render -->|SQL Connection Pool| Neon[(🐘 Neon.tech / Supabase<br/>PostgreSQL Database)]
-    Render -->|HTTP GET API| Wiki[(📖 Wikipedia API<br/>it.wikipedia.org)]
+graph TD
+    Push([🐙 Git Push su main]) --> GHA[⚙️ GitHub Actions CI]
+    Push --> Vercel[⚡ Vercel Auto-Deploy]
+    Push --> Render[🛠️ Render.com Auto-Deploy]
+
+    GHA -->|1. Test Backend| Vitest[🧪 53 Test Vitest]
+    GHA -->|2. Build Frontend| ViteBuild[🔨 tsc + vite build]
+    GHA -->|3. Test E2E| Playwright[🎭 7 Test Playwright]
+
+    Vercel -->|Build Vite| CDN[🌍 Aggiornamento CDN Globale]
+    Render -->|npm ci + build| App[🚀 Zero-Downtime Container Restart]
+    App --> Supabase[(🐘 Supabase PostgreSQL)]
 ```
 
-| Componente | Piattaforma Gratuita Consigliata | Caratteristiche |
-| :--- | :--- | :--- |
-| **Frontend** | [Vercel](https://vercel.com) / [Netlify](https://netlify.com) | CDN globale, HTTPS automatico, SPA rewrite nativo |
-| **Backend** | [Render.com](https://render.com) / [Fly.io](https://fly.io) | Container Node.js 20 LTS, HTTPS, auto-deploy da Git |
-| **Database** | [Neon.tech](https://neon.tech) / [Supabase](https://supabase.com) | PostgreSQL 16 serverless, connection pooling integrato |
+1. **Vercel (Frontend)**: Rileva il push, compila il bundle di produzione (`vite build`) e aggiorna la CDN globale in ~30 secondi.
+2. **Render.com (Backend)**: Rileva il push, esegue `npm ci --include=dev && npx prisma generate && npm run build` e avvia la nuova versione del server con routing zero-downtime.
+3. **GitHub Actions (CI)**: Esegue in ambiente pulito l'intera suite di 53 test backend e 7 test E2E Playwright per validare che nessuna regressione sia stata introdotta.
 
 ---
 
-## 📋 STEP 1: Creazione Database PostgreSQL Gratuito (Neon / Supabase)
+## 🛠️ Configurazione dei Servizi Cloud
 
-1. Registrati gratuitamente su **[Neon.tech](https://neon.tech)** o **[Supabase](https://supabase.com)**.
-2. Crea un nuovo progetto (es. `roadtounina-prod`) selezionando la regione europea più vicina (es. `Frankfurt` o `Ireland`).
-3. Copia la stringa di connessione **Postgres Connection URI** fornita dalla dashboard. Il formato è:
-   ```env
-   postgresql://<user>:<password>@<host>/<database>?sslmode=require
-   ```
-   > 💡 *Consiglio:* Su Neon, seleziona l'opzione "Pooled connection" per ottimizzare l'uso delle connessioni concorrenti.
+### 1. Backend Web Service (Render.com)
+- **Service Name**: `roadtounina-backend`
+- **Root Directory**: `backend`
+- **Runtime**: `Node`
+- **Build Command**: `npm ci --include=dev && npx prisma generate && npm run build`
+- **Start Command**: `npm run start`
+- **Health Check Path**: `/api/public/leaderboard`
+- **Environment Variables**:
+  - `NODE_ENV`: `production`
+  - `DATABASE_URL`: `postgresql://postgres.rocipfcbkqpkplbpnjkr:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:6543/postgres?pgbouncer=true`
+  - `DIRECT_URL`: `postgresql://postgres.rocipfcbkqpkplbpnjkr:[PASSWORD]@aws-0-eu-north-1.pooler.supabase.com:5432/postgres`
+  - `JWT_SECRET`: `roadtounina_super_secret_jwt_key_2026`
+  - `ALLOWED_ORIGINS`: `https://road-to-unina.vercel.app,http://localhost:5173`
 
----
-
-## 🛠️ STEP 2: Deployment Backend su Render.com
-
-1. Registrati o accedi a **[Render.com](https://render.com)**.
-2. Clicca su **New +** e seleziona **Web Service**.
-3. Collega il tuo repository GitHub/GitLab contenente il progetto `RoadToUnina`.
-4. Configura i parametri del servizio:
-   - **Name**: `roadtounina-backend`
-   - **Root Directory**: `backend`
-   - **Environment**: `Node`
-   - **Region**: `Frankfurt (EU Central)`
-   - **Branch**: `main`
-   - **Build Command**:
-     ```bash
-     npm ci && npx prisma generate && npm run build
-     ```
-   - **Start Command**:
-     ```bash
-     npm run start
-     ```
-   - **Instance Type**: `Free`
-
-5. Nella sezione **Environment Variables**, aggiungi le seguenti chiavi:
-   | Nome Variabile | Valore di Esempio | Descrizione |
-   | :--- | :--- | :--- |
-   | `NODE_ENV` | `production` | Modalità produzione per Express |
-   | `PORT` | `3001` (o assegnato da Render) | Porta di ascolto del server HTTP |
-   | `DATABASE_URL` | `postgresql://...` | Connection string PostgreSQL da Step 1 |
-   | `JWT_SECRET` | `unina_secret_key_prod_2026_speedrun!` | Chiave segreta per firma token JWT |
-   | `ALLOWED_ORIGINS` | `https://roadtounina.vercel.app,http://localhost:5173` | Domini autorizzati CORS (aggiorna con URL Vercel) |
-
-6. Clicca su **Create Web Service**. Al termine della build, copia l'URL pubblico del backend (es. `https://roadtounina-backend.onrender.com`).
+### 2. Frontend SPA (Vercel)
+- **Project Name**: `road-to-unina`
+- **Root Directory**: `frontend`
+- **Framework Preset**: `Vite`
+- **Build Command**: `vite build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_BASE_URL`: `https://roadtounina-backend.onrender.com/api`
+- **SPA Rewrites**: Configurate in [`frontend/vercel.json`](file:///Users/lucabarrella/Documents/RoadToUnina/frontend/vercel.json) (`/* -> /index.html`).
 
 ---
 
-## 🌱 STEP 3: Esecuzione Migrazioni e Database Seeding in Produzione
+## 🌱 Sincronizzazione Database & Seeding sul Cloud
 
-Per applicare lo schema Prisma e popolare il database con le partite di esempio e gli utenti simulati:
+Per applicare modifiche allo schema del database o rigenerare i dati simulati:
 
-### Opzione A: Tramite la Render Shell (Dashboard)
-1. Vai nella scheda del servizio su Render e clicca su **Shell**.
-2. Esegui il comando di migrazione e seeding:
-   ```bash
-   npx prisma migrate deploy
-   npx prisma db seed
-   ```
-
-### Opzione B: Dal proprio terminale locale (usando DATABASE_URL remoto)
 ```bash
 cd backend
-DATABASE_URL="<TUA_STRINGA_NEON_PRODUZIONE>" npx prisma migrate deploy
-DATABASE_URL="<TUA_STRINGA_NEON_PRODUZIONE>" npx prisma db seed
+
+# Applica modifiche allo schema su Supabase
+DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config ./node_modules/prisma/build/index.js db push
+
+# Popola il database con 10 utenti e 20 partite di test
+DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config ./node_modules/prisma/build/index.js db seed
 ```
 
 ---
 
-## ⚡ STEP 4: Deployment Frontend su Vercel
+## 🐳 Esecuzione Locale Alternativa con Docker Compose
 
-1. Accedi a **[Vercel](https://vercel.com)** e clicca su **Add New... > Project**.
-2. Importa il repository `RoadToUnina`.
-3. Configura le impostazioni di build:
-   - **Framework Preset**: `Vite`
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-   - **Install Command**: `npm ci`
-4. Nella sezione **Environment Variables**, aggiungi:
-   | Nome Variabile | Valore |
-   | :--- | :--- |
-   | `VITE_API_BASE_URL` | `https://roadtounina-backend.onrender.com/api` |
-5. Clicca su **Deploy**.
-6. Vercel assegnerà un dominio HTTPS (es. `https://roadtounina.vercel.app`).
-7. Torna su Render.com e assicurati che la variabile `ALLOWED_ORIGINS` del backend contenga l'URL Vercel generato.
-
-> 📄 **Nota sulle rotte SPA:** Il file [`frontend/vercel.json`](file:///Users/lucabarrella/Documents/RoadToUnina/frontend/vercel.json) include già la regola di rewrite `/* -> /index.html` per garantire il corretto funzionamento di React Router su `/game`, `/leaderboard`, `/login`, ecc.
-
----
-
-## 🐳 STEP 5 (Alternativa): Deployment Docker Locale o su VPS
-
-Se preferisci avviare l'intero stack (Frontend + Backend + PostgreSQL) tramite Docker:
+Se durante la discussione d'esame si desidera mostrare l'applicazione containerizzata in locale:
 
 ```bash
-# 1. Clona il repository ed entra nella cartella
-cd RoadToUnina
+# Avvia Frontend + Backend + PostgreSQL locale
+docker compose up --build
 
-# 2. Avvia tutti i servizi in background
-docker compose up --build -d
-
-# 3. Applica il seeding iniziale nel container backend
-docker compose exec backend npx prisma migrate deploy
+# In un secondo terminale, esegui il seed iniziale nel container
 docker compose exec backend npx prisma db seed
 ```
 
-- **Frontend**: `http://localhost:5173`
+- **Frontend**: `http://localhost:5173` (o `http://localhost:80`)
 - **Backend API**: `http://localhost:3001`
 - **PostgreSQL**: `localhost:5432`
-
----
-
-## ✅ Checklist di Verifica Post-Deployment
-
-- [ ] **Health Check API**: Verifica che `https://<backend-url>/api/public/leaderboard` restituisca lo status 200 con la classifica JSON.
-- [ ] **Accesso Frontend**: Naviga su `https://<frontend-url>` e verifica il caricamento della grafica Neo-Brutalist.
-- [ ] **Registrazione & Login**: Registra un nuovo account da `https://<frontend-url>/register`.
-- [ ] **Partita Speedrun**: Avvia una speedrun e completa il percorso fino all'articolo obiettivo.
-- [ ] **Classifica**: Controlla la visualizzazione del podio su `/leaderboard`.
