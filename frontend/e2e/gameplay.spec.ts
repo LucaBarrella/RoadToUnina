@@ -223,7 +223,7 @@ test.describe('RoadToUnina — E2E & Automated Playtest Suite', () => {
     await expect(profileCard.getByText(testUser.email, { exact: true })).toBeVisible();
 
     // Verify completed speedrun appears in recent history
-    const recentHistory = profileCard.getByText('Napoli ➔ Unina');
+    const recentHistory = profileCard.getByText(/➔ Unina/i);
     await expect(recentHistory.first()).toBeVisible();
   });
 

@@ -3,7 +3,7 @@
 [![Live App](https://img.shields.io/badge/Live_App-road--to--unina.vercel.app-FF007A?style=for-the-badge&logo=vercel&logoColor=white)](https://road-to-unina.vercel.app)
 [![React](https://img.shields.io/badge/React-v19.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Neo--Brutalist-38BDF8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Playwright Tests](https://img.shields.io/badge/Playwright_E2E-7%2F7%20Passing%20(100%25)-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](#-test-end-to-end-playwright)
+[![Playwright Tests](https://img.shields.io/badge/Playwright_E2E-18%2F18%20Passing%20(100%25)-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)](#-test-end-to-end-playwright)
 
 Single Page Application (SPA) reattiva per il gioco di speedrunning enciclopedico **RoadToUnina**, realizzata con **React 19**, **TypeScript**, **Vite**, **Tailwind CSS** con design system **Neo-Brutalism** personalizzato.
 
@@ -36,19 +36,22 @@ L'applicazione sarà accessibile su: **`http://localhost:5173`**.
 
 ---
 
-## 🧪 Test End-to-End (Playwright)
+## 🧪 Test End-to-End (Playwright — 18 Test)
 
-Il frontend include **7 test E2E automatizzati** che simulano le azioni reali del browser:
+Il frontend include **18 test E2E automatizzati** che simulano le azioni reali del browser:
 
 ```bash
-# Esegui tutti i test E2E
+# Esegui tutti i 18 test E2E
 npx playwright test
 
 # Esegui con interfaccia grafica interattiva
 npx playwright test --ui
 
-# Esegui specificamente lo speedrun playtest Moon Knight -> Unina
-npx playwright test e2e/speedrun-moonknight.spec.ts
+# Esegui le speedrun tematiche (Boris, antirez, Local LLMs, Maradona, Pizza, Totò)
+npx playwright test e2e/thematic-speedruns.spec.ts
+
+# Esegui i test di persistenza sessione e accessibilità UX
+npx playwright test e2e/ux-accessibility.spec.ts
 ```
 
 ---

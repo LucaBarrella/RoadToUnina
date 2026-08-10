@@ -34,7 +34,7 @@ graph TD
 
     GHA -->|1. Test Backend| Vitest[🧪 53 Test Vitest]
     GHA -->|2. Build Frontend| ViteBuild[🔨 tsc + vite build]
-    GHA -->|3. Test E2E| Playwright[🎭 7 Test Playwright]
+    GHA -->|3. Test E2E| Playwright[🎭 18 Test Playwright]
 
     Vercel -->|Build Vite| CDN[🌍 Aggiornamento CDN Globale]
     Render -->|npm ci + build| App[🚀 Zero-Downtime Container Restart]
@@ -43,7 +43,7 @@ graph TD
 
 1. **Vercel (Frontend)**: Rileva il push, compila il bundle di produzione (`vite build`) e aggiorna la CDN globale in ~30 secondi.
 2. **Render.com (Backend)**: Rileva il push, esegue `npm ci --include=dev && npx prisma generate && npm run build` e avvia la nuova versione del server con routing zero-downtime.
-3. **GitHub Actions (CI)**: Esegue in ambiente pulito l'intera suite di 53 test backend e 7 test E2E Playwright per validare che nessuna regressione sia stata introdotta.
+3. **GitHub Actions (CI)**: Esegue in ambiente pulito l'intera suite di 53 test backend e 18 test E2E Playwright per validare che nessuna regressione sia stata introdotta.
 
 ---
 

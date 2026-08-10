@@ -10,6 +10,7 @@ import publicRoutes from './routes/publicRoutes';
 import { errorMiddleware } from './middlewares/errorMiddleware';
 import { prisma } from './config/db';
 
+dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 /**
@@ -17,7 +18,7 @@ dotenv.config();
  */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 auth requests per window
+  max: process.env.NODE_ENV === 'production' ? 50 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => process.env.NODE_ENV === 'test',
