@@ -434,7 +434,34 @@ export class WikiService {
       }
 
       if (data.error) {
-        throw new AppError(`Wikipedia article not found: ${title}`, 404);
+        // Fallback: If exact title parsing fails, attempt MediaWiki search to find closest article match
+        try {
+          const searchResponse = await axios.get(WIKIPEDIA_API_URL, {
+            params: {
+              action: 'query',
+              list: 'search',
+              srsearch: title,
+              srnamespace: 0,
+              srlimit: 1,
+              format: 'json',
+            },
+            headers: {
+              'User-Agent': USER_AGENT_HEADER,
+            },
+            timeout: HTTP_TIMEOUT_MS,
+          });
+
+          const searchResults = searchResponse.data?.query?.search;
+          if (Array.isArray(searchResults) && searchResults.length > 0 && searchResults[0]?.title) {
+            const bestMatchTitle = searchResults[0].title;
+            // Retry fetch with resolved best match title
+            return await this.getWikiArticleContent(bestMatchTitle);
+          }
+        } catch {
+          // Ignore search fallback errors and proceed to throw friendly 404 AppError
+        }
+
+        throw new AppError(`Pagina Wikipedia non trovata per: "${title}"`, 404);
       }
 
       const parseData = data.parse;

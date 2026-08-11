@@ -254,7 +254,16 @@ async function main() {
     const clickCount = g.steps.length > 0 ? g.steps.length - 1 : 0;
     const currentPageTitle = g.steps[g.steps.length - 1] || g.startPage;
 
-    const game = await prisma.game.create({
+    const stepsData = g.steps.map((stepTitle, i) => {
+      const stepTime = new Date(startTime.getTime() + (i * g.durationSeconds * 1000) / Math.max(1, g.steps.length));
+      return {
+        pageTitle: stepTitle,
+        stepOrder: i + 1,
+        createdAt: stepTime,
+      };
+    });
+
+    await prisma.game.create({
       data: {
         userId: user.id,
         startPageTitle: g.startPage,
@@ -266,20 +275,11 @@ async function main() {
         endTime,
         createdAt: startTime,
         updatedAt: endTime || startTime,
+        steps: {
+          create: stepsData,
+        },
       },
     });
-
-    for (let i = 0; i < g.steps.length; i++) {
-      const stepTime = new Date(startTime.getTime() + (i * g.durationSeconds * 1000) / Math.max(1, g.steps.length));
-      await prisma.gameStep.create({
-        data: {
-          gameId: game.id,
-          pageTitle: g.steps[i]!,
-          stepOrder: i + 1,
-          createdAt: stepTime,
-        },
-      });
-    }
 
     gameCounter++;
   }

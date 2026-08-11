@@ -128,6 +128,28 @@ export function useGameEngine(): UseGameEngineReturn {
     }
   }, []);
 
+  const getErrorMessage = (err: unknown, fallback: string): string => {
+    if (axios.isAxiosError(err)) {
+      const serverErr = err.response?.data?.error;
+      if (typeof serverErr === 'string' && serverErr.trim().length > 0) {
+        return serverErr;
+      }
+      if (err.response?.status === 404) {
+        return 'Pagina Wikipedia non trovata. Inserisci un altro titolo o lascia il campo vuoto per una voce casuale.';
+      }
+      if (err.response?.status === 502) {
+        return 'Errore di comunicazione con Wikipedia. Riprova tra qualche istante.';
+      }
+    }
+    if (err instanceof Error && err.message) {
+      if (err.message.includes('404')) {
+        return 'Pagina Wikipedia non trovata. Inserisci un altro titolo o lascia il campo vuoto per una voce casuale.';
+      }
+      return err.message;
+    }
+    return fallback;
+  };
+
   const startNewGame = async (overrideStartPage?: string) => {
     try {
       setLoading(true);
@@ -137,7 +159,7 @@ export function useGameEngine(): UseGameEngineReturn {
       setCurrentArticle(activeData.currentArticle);
       return activeData.game;
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Impossibile avviare una nuova partita.';
+      const msg = getErrorMessage(err, 'Impossibile avviare una nuova partita.');
       setError(msg);
       throw err;
     } finally {
@@ -158,7 +180,7 @@ export function useGameEngine(): UseGameEngineReturn {
         // Bad request / invalid link clicked -> Show discreet temporary toast instead of permanent error banner
         showToast('Link non valido o non enciclopedico');
       } else {
-        const msg = err instanceof Error ? err.message : 'Mossa non valida o errore di rete.';
+        const msg = getErrorMessage(err, 'Mossa non valida o errore di rete.');
         if (
           msg.includes('400') ||
           msg.toLowerCase().includes('non valido') ||
