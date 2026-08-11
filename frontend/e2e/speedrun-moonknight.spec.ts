@@ -48,8 +48,8 @@ test.describe('RoadToUnina — E2E Speedrun Playtest: Moon Knight ➔ Unina', ()
 
     // Step 1: Navigazione da Moon Knight
     // Cerca il chip "Egitto" (o "Italia")
-    const egittoChip = wikiContent.locator('a.wiki-chip, a').filter({ hasText: /^Egitto$/i }).first();
-    const italiaChip = wikiContent.locator('a.wiki-chip, a').filter({ hasText: /^Italia$/i }).first();
+    const egittoChip = wikiContent.locator('a[data-title="Egitto"], a.wiki-chip:has-text("Egitto"), a:has-text("Egitto")').first();
+    const italiaChip = wikiContent.locator('a[data-title="Italia"], a.wiki-chip:has-text("Italia"), a:has-text("Italia")').first();
 
     let clickCountExpected = 0;
 
@@ -59,7 +59,7 @@ test.describe('RoadToUnina — E2E Speedrun Playtest: Moon Knight ➔ Unina', ()
       await expect(page.locator('header h1')).toContainText(/Egitto/i, { timeout: 15000 });
 
       // Su Egitto, naviga verso Italia
-      const italiaFromEgitto = wikiContent.locator('a.wiki-chip, a').filter({ hasText: /^Italia$/i }).first();
+      const italiaFromEgitto = wikiContent.locator('a[data-title="Italia"], a.wiki-chip:has-text("Italia"), a:has-text("Italia")').first();
       await expect(italiaFromEgitto).toBeVisible({ timeout: 10000 });
       await italiaFromEgitto.click();
       clickCountExpected++;
@@ -71,16 +71,14 @@ test.describe('RoadToUnina — E2E Speedrun Playtest: Moon Knight ➔ Unina', ()
 
     // Step 2: Su Italia, clicca sul chip "Napoli"
     await expect(page.locator('header h1')).toContainText(/Italia/i, { timeout: 15000 });
-    const napoliChip = wikiContent.locator('a.wiki-chip, a').filter({ hasText: /^Napoli$/i }).first();
+    const napoliChip = wikiContent.locator('a[data-title="Napoli"], a.wiki-chip:has-text("Napoli"), a:has-text("Napoli")').first();
     await expect(napoliChip).toBeVisible({ timeout: 10000 });
     await napoliChip.click();
     clickCountExpected++;
 
     // Step 3: Su Napoli, clicca sul chip "Università degli Studi di Napoli Federico II"
     await expect(page.locator('header h1')).toContainText(/Napoli/i, { timeout: 15000 });
-    const uninaChip = wikiContent.locator('a.wiki-chip, a').filter({
-      hasText: /Università degli Studi di Napoli Federico II/i,
-    }).first();
+    const uninaChip = wikiContent.locator('a[data-title="Università degli Studi di Napoli Federico II"], a.wiki-chip:has-text("Università degli Studi di Napoli Federico II")').first();
     await expect(uninaChip).toBeVisible({ timeout: 10000 });
     await uninaChip.click();
     clickCountExpected++;
