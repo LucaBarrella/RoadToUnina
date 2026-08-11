@@ -11,9 +11,9 @@ export const gameApi = {
    * @param overrideStartPage - Optional custom starting Wikipedia article title.
    * @returns Newly initialized Game session entity.
    */
-  async startGame(overrideStartPage?: string): Promise<Game> {
+  async startGame(overrideStartPage?: string): Promise<ActiveGameResponse> {
     const payload = overrideStartPage ? { overrideStartPage } : {};
-    const response = await apiClient.post<Game>('/games/start', payload);
+    const response = await apiClient.post<ActiveGameResponse>('/games/start', payload);
     return response.data;
   },
 
@@ -32,10 +32,10 @@ export const gameApi = {
    *
    * @param gameId - Unique identifier of the active game session.
    * @param targetTitle - Title of the Wikipedia article link clicked by the user.
-   * @returns Updated Game session entity.
+   * @returns Updated ActiveGameResponse containing session entity and new page content.
    */
-  async makeStep(gameId: string, targetTitle: string): Promise<Game> {
-    const response = await apiClient.post<Game>(`/games/${gameId}/step`, { targetTitle });
+  async makeStep(gameId: string, targetTitle: string): Promise<ActiveGameResponse> {
+    const response = await apiClient.post<ActiveGameResponse>(`/games/${gameId}/step`, { targetTitle });
     return response.data;
   },
 

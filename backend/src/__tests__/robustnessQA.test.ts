@@ -335,7 +335,7 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
   describe('2. LOGICA DI GIOCO E CONDIZIONI AL CONTORNO (Game Logic Robustness)', () => {
     it('should reject step navigation to a page NOT present in validLinks with 400 AppError', async () => {
       process.env.NODE_ENV = 'test';
-      const game = await gameService.startGame(userAlphaId, 'Napoli');
+      const { game } = await gameService.startGame(userAlphaId, 'Napoli');
 
       // Fetch valid links for Napoli
       const napoliContent = await wikiService.getWikiArticleContent('Napoli');
@@ -369,7 +369,7 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
 
     it('should reject step navigation with empty string or missing targetTitle with 400', async () => {
       process.env.NODE_ENV = 'test';
-      const game = await gameService.startGame(userAlphaId, 'Napoli');
+      const { game } = await gameService.startGame(userAlphaId, 'Napoli');
 
       // Empty string
       const resEmpty = await request(app)
@@ -401,7 +401,7 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
 
     it('should reject step navigation on an already ABANDONED or COMPLETED game with 404', async () => {
       process.env.NODE_ENV = 'test';
-      const game = await gameService.startGame(userAlphaId, 'Napoli');
+      const { game } = await gameService.startGame(userAlphaId, 'Napoli');
 
       // Abandon the game
       await gameService.abandonGame(userAlphaId, game.id);
@@ -439,7 +439,7 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
 
     it('should strictly PREVENT User Beta from interacting with User Alpha game (Authorization / IDOR)', async () => {
       process.env.NODE_ENV = 'test';
-      const gameAlpha = await gameService.startGame(userAlphaId, 'Napoli');
+      const { game: gameAlpha } = await gameService.startGame(userAlphaId, 'Napoli');
 
       // User Beta attempts to step in User Alpha's game
       const maliciousStepRes = await request(app)
@@ -486,7 +486,7 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
   describe('3. CONCORRENZA E RICHIESTE MULTIPLE (Stress & Concurrency Test)', () => {
     it('should maintain atomic consistency under 15 simultaneous step requests on the same game', async () => {
       process.env.NODE_ENV = 'test';
-      const game = await gameService.startGame(userAlphaId, 'Napoli');
+      const { game } = await gameService.startGame(userAlphaId, 'Napoli');
 
       const napoliContent = await wikiService.getWikiArticleContent('Napoli');
       const validLink = napoliContent.validLinks[0] || 'Vesuvio';
@@ -528,7 +528,7 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
 
     it('should atomically handle race conditions between concurrent step and abandon requests', async () => {
       process.env.NODE_ENV = 'test';
-      const game = await gameService.startGame(userAlphaId, 'Napoli');
+      const { game } = await gameService.startGame(userAlphaId, 'Napoli');
 
       const napoliContent = await wikiService.getWikiArticleContent('Napoli');
       const validLink = napoliContent.validLinks[0] || 'Vesuvio';

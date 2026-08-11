@@ -23,8 +23,8 @@ export class GameController {
       }
 
       const { overrideStartPage } = (req.body || {}) as { overrideStartPage?: string };
-      const game: GameWithSteps = await gameService.startGame(userId, overrideStartPage);
-      res.status(201).json(game);
+      const activeGame: ActiveGameResponse = await gameService.startGame(userId, overrideStartPage);
+      res.status(201).json(activeGame);
     } catch (error) {
       next(error);
     }
@@ -69,8 +69,8 @@ export class GameController {
 
       const gameId = String(req.params.id);
       const { targetTitle } = req.body as { targetTitle: string };
-      const updatedGame: GameWithSteps = await gameService.makeStep(userId, gameId, targetTitle);
-      res.status(200).json(updatedGame);
+      const activeGame: ActiveGameResponse = await gameService.makeStep(userId, gameId, targetTitle);
+      res.status(200).json(activeGame);
     } catch (error) {
       next(error);
     }

@@ -73,9 +73,9 @@ npm test
 | `POST` | `/api/auth/register` | Pubblico | Registrazione nuovo utente con password cifrata in bcrypt. |
 | `POST` | `/api/auth/login` | Pubblico | Autenticazione utente ed emissione token JWT. |
 | `GET` | `/api/auth/me` | Protetto | Profilo utente autenticato. |
-| `POST` | `/api/games/start` | Protetto | Avvio nuova partita da voce casuale Wikipedia. |
+| `POST` | `/api/games/start` | Protetto | Avvio nuova partita da voce casuale (restituisce stato gioco + HTML voce iniziale). |
 | `GET` | `/api/games/active` | Protetto | Recupero stato partita attiva e contenuto HTML pagina corrente. |
-| `POST` | `/api/games/:id/step` | Protetto | Navigazione a un link target con verifica anti-cheat. |
+| `POST` | `/api/games/:id/step` | Protetto | Navigazione a un link target con anti-cheat (restituisce stato aggiornato + HTML nuovo articolo). |
 | `POST` | `/api/games/:id/abandon` | Protetto | Forfeit / abbandono manuale della partita attiva. |
 | `GET` | `/api/public/completed-games` | Pubblico | Storico partite concluse con percorso e tempi. |
 | `GET` | `/api/public/leaderboard` | Pubblico | Classifica globale dei migliori giocatori. |

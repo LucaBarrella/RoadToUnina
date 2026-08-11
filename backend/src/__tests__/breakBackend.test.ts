@@ -141,7 +141,7 @@ describe('BREAK BACKEND — Penetration & Extreme Stress Tests', () => {
   describe('2. CONCURRENCY & RACE CONDITION STRESS TEST (20 Concurrent Requests)', () => {
     it('should handle 20 parallel click requests atomically without corrupting state or deadlocking', async () => {
       process.env.NODE_ENV = 'test';
-      const game = await gameService.startGame(userAId, 'Napoli');
+      const { game } = await gameService.startGame(userAId, 'Napoli');
 
       const content = await wikiService.getWikiArticleContent('Napoli');
       const validTarget = content.validLinks[0] || 'Vesuvio';
@@ -197,7 +197,7 @@ describe('BREAK BACKEND — Penetration & Extreme Stress Tests', () => {
   describe('4. AUTHENTICATION & PRIVILEGE ESCALATION (IDOR Attacks)', () => {
     it('should prevent User B from stepping or advancing User A game (IDOR)', async () => {
       process.env.NODE_ENV = 'test';
-      const gameA = await gameService.startGame(userAId, 'Napoli');
+      const { game: gameA } = await gameService.startGame(userAId, 'Napoli');
 
       // User B tries to step in User A's game using User B's valid JWT token
       const maliciousRes = await request(app)

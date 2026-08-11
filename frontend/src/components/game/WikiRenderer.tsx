@@ -243,8 +243,6 @@ export function parseWikiSections(html: string): WikiSection[] {
   const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
   const sections: WikiSection[] = [];
   let match: RegExpExecArray | null;
-  let lastIndex = 0;
-  let currentTitle = 'Introduzione & Panoramica';
   let sectionIndex = 0;
 
   const matches: Array<{ title: string; index: number; fullMatchLength: number }> = [];
@@ -424,15 +422,12 @@ export const WikiRenderer: React.FC<WikiRendererProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
+    if (e.key === ' ') {
       const target = e.target as HTMLElement;
       const anchor = target.closest('a');
       if (anchor) {
         e.preventDefault();
-        const dataTitle = anchor.getAttribute('data-title');
-        if (dataTitle) {
-          processNavigation(dataTitle);
-        }
+        anchor.click();
       }
     }
   };

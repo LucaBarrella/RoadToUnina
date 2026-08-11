@@ -69,6 +69,11 @@ describe('GameService', () => {
     it('should create a new game when user has no active games', async () => {
       mockedPrisma.game.findFirst.mockResolvedValueOnce(null);
       mockedWikiService.getRandomWikiArticle.mockResolvedValueOnce('Vesuvio');
+      mockedWikiService.getWikiArticleContent.mockResolvedValueOnce({
+        title: 'Vesuvio',
+        htmlContent: '<p>Vesuvio</p>',
+        validLinks: [],
+      });
 
       const fakeGame = {
         id: 'game-123',
@@ -87,8 +92,9 @@ describe('GameService', () => {
 
       const result = await gameService.startGame('user-1');
 
-      expect(result.id).toBe('game-123');
-      expect(result.startPageTitle).toBe('Vesuvio');
+      expect(result.game.id).toBe('game-123');
+      expect(result.game.startPageTitle).toBe('Vesuvio');
+      expect(result.currentArticle.title).toBe('Vesuvio');
     });
 
     it('should throw AppError 400 if user has an active game less than 24h old', async () => {
@@ -110,6 +116,11 @@ describe('GameService', () => {
       });
       mockedPrisma.game.update.mockResolvedValueOnce({});
       mockedWikiService.getRandomWikiArticle.mockResolvedValueOnce('Capri');
+      mockedWikiService.getWikiArticleContent.mockResolvedValueOnce({
+        title: 'Capri',
+        htmlContent: '<p>Capri</p>',
+        validLinks: [],
+      });
 
       const fakeGame = {
         id: 'new-game',
@@ -127,7 +138,8 @@ describe('GameService', () => {
         where: { id: 'old-game' },
         data: { status: GameStatus.ABANDONED },
       });
-      expect(result.id).toBe('new-game');
+      expect(result.game.id).toBe('new-game');
+      expect(result.currentArticle.title).toBe('Capri');
     });
   });
 
@@ -167,8 +179,9 @@ describe('GameService', () => {
 
       const result = await gameService.makeStep('user-1', 'game-123', 'Vesuvio');
 
-      expect(result.clickCount).toBe(1);
-      expect(result.currentPageTitle).toBe('Vesuvio');
+      expect(result.game.clickCount).toBe(1);
+      expect(result.game.currentPageTitle).toBe('Vesuvio');
+      expect(result.currentArticle.title).toBe('Vesuvio');
       expect(mockedPrisma.game.updateMany).toHaveBeenCalledWith({
         where: {
           id: 'game-123',
@@ -232,7 +245,8 @@ describe('GameService', () => {
 
       const result = await gameService.makeStep('user-1', 'game-123', targetPage);
 
-      expect(result.status).toBe(GameStatus.COMPLETED);
+      expect(result.game.status).toBe(GameStatus.COMPLETED);
+      expect(result.currentArticle.title).toBe(targetPage);
       expect(mockedPrisma.game.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ id: 'game-123' }),

@@ -81,13 +81,13 @@ export class GameService {
   public async startGame(
     userId: string,
     overrideStartPage?: string
-  ): Promise<GameWithSteps> {
+  ): Promise<ActiveGameResponse> {
     const startTitle: string =
       overrideStartPage && overrideStartPage.trim().length > 0
         ? overrideStartPage.trim()
         : await wikiService.getRandomWikiArticle();
 
-    return prisma.$transaction(
+    const createdGame = await prisma.$transaction(
       async (tx) => {
         // Acquire exclusive row-level lock on User record to serialize concurrent startGame operations in PostgreSQL
         if (tx.user?.update) {
@@ -119,7 +119,7 @@ export class GameService {
           });
         }
 
-        const createdGame = await tx.game.create({
+        const game = await tx.game.create({
           data: {
             userId,
             startPageTitle: startTitle,
@@ -132,19 +132,26 @@ export class GameService {
 
         await tx.gameStep.create({
           data: {
-            gameId: createdGame.id,
+            gameId: game.id,
             pageTitle: startTitle,
             stepOrder: 1,
           },
         });
 
         return tx.game.findUniqueOrThrow({
-          where: { id: createdGame.id },
+          where: { id: game.id },
           include: { steps: { orderBy: { stepOrder: 'asc' } } },
         });
       },
       { timeout: 10000 }
     );
+
+    const currentArticle = await wikiService.getWikiArticleContent(startTitle);
+
+    return {
+      game: createdGame,
+      currentArticle,
+    };
   }
 
   /**
@@ -194,17 +201,17 @@ export class GameService {
    * @param {string} userId - Unique identifier of the authenticated user.
    * @param {string} gameId - Unique identifier of the game.
    * @param {string} targetTitle - Title of the link selected by the user.
-   * @returns {Promise<GameWithSteps>} Updated Game entity with new step.
+   * @returns {Promise<ActiveGameResponse>} Updated Game entity with new step and target article HTML.
    * @throws {AppError} 404 if game not found, 400 if target link is invalid, 409 on concurrent step conflict.
    *
    * @example
-   * const updatedGame = await gameService.makeStep('user-123', 'game-456', 'Napoli');
+   * const activeGame = await gameService.makeStep('user-123', 'game-456', 'Napoli');
    */
   public async makeStep(
     userId: string,
     gameId: string,
     targetTitle: string
-  ): Promise<GameWithSteps> {
+  ): Promise<ActiveGameResponse> {
     const normalizedTarget: string = normalizeWikiTitle(targetTitle);
 
     const game = await prisma.game.findFirst({
@@ -244,7 +251,7 @@ export class GameService {
       normalizedResolved === normalizedTargetGoal ||
       normalizedTarget === normalizedTargetGoal;
 
-    return prisma.$transaction(
+    const updatedGame = await prisma.$transaction(
       async (tx) => {
         const updateResult = await tx.game.updateMany({
           where: {
@@ -283,6 +290,11 @@ export class GameService {
       },
       { timeout: 10000 }
     );
+
+    return {
+      game: updatedGame,
+      currentArticle: targetArticleContent,
+    };
   }
 
   /**

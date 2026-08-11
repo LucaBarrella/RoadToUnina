@@ -25,27 +25,10 @@ export const publicApi = {
    * @returns Array of LeaderboardEntry records.
    */
   async getLeaderboard(limit?: number): Promise<LeaderboardEntry[]> {
-    const response = await apiClient.get<Array<{
-      rank?: number;
-      userId?: string;
-      username?: string;
-      user?: { id: string; username: string };
-      bestClickCount: number;
-      bestDurationSeconds: number;
-      completedGamesCount: number;
-    }>>('/public/leaderboard', {
+    const response = await apiClient.get<LeaderboardEntry[]>('/public/leaderboard', {
       params: limit ? { limit } : undefined,
     });
-    return (response.data || []).map((entry, index) => ({
-      rank: entry.rank ?? index + 1,
-      user: entry.user ?? {
-        id: entry.userId || `user-${index}`,
-        username: entry.username || 'Anonimo',
-      },
-      bestClickCount: entry.bestClickCount,
-      bestDurationSeconds: entry.bestDurationSeconds,
-      completedGamesCount: entry.completedGamesCount,
-    }));
+    return response.data;
   },
 };
 

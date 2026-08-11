@@ -132,15 +132,10 @@ export function useGameEngine(): UseGameEngineReturn {
     try {
       setLoading(true);
       setError(null);
-      const newGame = await gameApi.startGame(overrideStartPage);
-      setGame(newGame);
-      // Fetch current article data via active game load
-      const activeData = await gameApi.getActiveGame();
-      if (activeData) {
-        setGame(activeData.game);
-        setCurrentArticle(activeData.currentArticle);
-      }
-      return newGame;
+      const activeData = await gameApi.startGame(overrideStartPage);
+      setGame(activeData.game);
+      setCurrentArticle(activeData.currentArticle);
+      return activeData.game;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Impossibile avviare una nuova partita.';
       setError(msg);
@@ -155,15 +150,9 @@ export function useGameEngine(): UseGameEngineReturn {
     try {
       setLoading(true);
       setError(null);
-      const updatedGame = await gameApi.makeStep(game.id, targetTitle);
-      setGame(updatedGame);
-
-      // Refresh active game state to get new article content
-      const activeData = await gameApi.getActiveGame();
-      if (activeData) {
-        setGame(activeData.game);
-        setCurrentArticle(activeData.currentArticle);
-      }
+      const activeData = await gameApi.makeStep(game.id, targetTitle);
+      setGame(activeData.game);
+      setCurrentArticle(activeData.currentArticle);
     } catch (err: unknown) {
       if (axios.isAxiosError(err) && (err.response?.status === 400 || err.status === 400)) {
         // Bad request / invalid link clicked -> Show discreet temporary toast instead of permanent error banner

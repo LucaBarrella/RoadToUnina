@@ -318,8 +318,8 @@ sequenceDiagram
     DB-->>S: Record Partita Aggiornato
     end
 
-    S-->>C: Entita Game con Steps
-    C-->>Client: HTTP 200 OK + JSON Payload
+    S-->>C: ActiveGameResponse (Game con Steps + Current Article HTML)
+    C-->>Client: HTTP 200 OK + JSON ActiveGameResponse
 ```
 
 ---

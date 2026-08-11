@@ -92,8 +92,8 @@ sequenceDiagram
     end
     
     DB-->>Svc: GameWithSteps aggiornato
-    Svc-->>Ctrl: GameWithSteps
-    Ctrl-->>Client: HTTP 200 OK (JSON GameWithSteps)
+    Svc-->>Ctrl: ActiveGameResponse { game, currentArticle }
+    Ctrl-->>Client: HTTP 200 OK (JSON ActiveGameResponse: { game, currentArticle })
 ```
 
 ---
@@ -229,9 +229,9 @@ Se il docente chiede: *"Quali accorgimenti ingegneristici avete adottato per gar
    - `GET /api/auth/me`: Richiede `authMiddleware` $\rightarrow$ restituisce il profilo utente sanificato.
 2. **`gameRoutes.ts` & `gameController.ts`:**
    - Tutte le rotte sono protette da `authMiddleware`.
-   - `POST /api/games/start`: Valida `startGameSchema` $\rightarrow$ `gameService.startGame` $\rightarrow$ HTTP 201.
-   - `GET /api/games/active`: `gameService.getActiveGame` $\rightarrow$ HTTP 200 (restituisce stato gioco + HTML della pagina corrente).
-   - `POST /api/games/:id/step`: Valida `gameIdParamSchema` (UUID) e `makeStepSchema` $\rightarrow$ `gameService.makeStep` $\rightarrow$ HTTP 200.
+   - `POST /api/games/start`: Valida `startGameSchema` $\rightarrow$ `gameService.startGame` $\rightarrow$ HTTP 201 (restituisce `ActiveGameResponse`: `{ game, currentArticle }`).
+   - `GET /api/games/active`: `gameService.getActiveGame` $\rightarrow$ HTTP 200 (restituisce `ActiveGameResponse`: `{ game, currentArticle }`).
+   - `POST /api/games/:id/step`: Valida `gameIdParamSchema` (UUID) e `makeStepSchema` $\rightarrow$ `gameService.makeStep` $\rightarrow$ HTTP 200 (restituisce `ActiveGameResponse`: `{ game, currentArticle }`, eliminando il double-fetch lato frontend).
    - `POST /api/games/:id/abandon`: Valida UUID $\rightarrow$ `gameService.abandonGame` $\rightarrow$ HTTP 200.
 3. **`publicRoutes.ts` & `publicController.ts`:**
    - Rotte aperte a tutti (utenti non registrati / ospiti).
@@ -250,9 +250,9 @@ Se il docente chiede: *"Quali accorgimenti ingegneristici avete adottato per gar
    - `getRandomWikiArticle`: Interroga `action=query&list=random&rnnamespace=0&rnfilterredir=nonredirects`.
    - `getWikiArticleContent`: Controlla la cache LRU a doppia chiave; se assente, interroga `action=parse`, estrae `validLinks` (`ns === 0`) e sanifica l'HTML con `sanitize-html`.
 3. **`gameService.ts`:**
-   - `startGame`: Verifica se l'utente ha partite in corso; se una partita esistente ha superato le 24 ore (`isGameExpired`), la marca automaticamente come `ABANDONED` e ne avvia una nuova.
+   - `startGame`: Verifica se l'utente ha partite in corso; se una partita esistente ha superato le 24 ore (`isGameExpired`), la marca automaticamente come `ABANDONED` e ne avvia una nuova, restituendo `ActiveGameResponse` con l'HTML iniziale.
    - `getActiveGame`: Restituisce il gioco attivo e recupera via `wikiService` l'HTML della pagina corrente.
-   - `makeStep`: Anti-cheat check, risoluzione pagina di destinazione, controllo condizione di vittoria, transazione atomica con OCC (`updateMany`) e inserimento del record `GameStep`.
+   - `makeStep`: Anti-cheat check, risoluzione pagina di destinazione, controllo condizione di vittoria, transazione atomica con OCC (`updateMany`), inserimento del record `GameStep` e ritorno immediato di `ActiveGameResponse` con l'HTML del nuovo articolo.
    - `abandonGame`: Imposta lo stato a `ABANDONED`.
 4. **`publicService.ts`:**
    - `getCompletedGames`: Restituisce le partite completate includendo username del giocatore, numero di click, durata in secondi (`calculateDurationInSeconds`) e la sequenza cronologica di tutti i passi (`steps`).
@@ -263,13 +263,13 @@ Se il docente chiede: *"Quali accorgimenti ingegneristici avete adottato per gar
 
 ---
 
-### 3.8 `src/__tests__/` (Suite di Test Automatizzati - 50 Test)
-Il backend è validato da **50 test automatici** distribuiti su 4 file specializzati:
+### 3.8 `src/__tests__/` (Suite di Test Automatizzati - 53 Test)
+Il backend è validato da **53 test automatici** distribuiti su 4 file specializzati:
 
-1. **`wikiService.test.ts` (5 test):**
+1. **`wikiService.test.ts` (8 test):**
    - Mocking di Axios per testare il parsing MediaWiki, la sanificazione XSS, il filtraggio dei link `ns=0` e la gestione degli errori HTTP 404 e 502.
 2. **`gameService.test.ts` (8 test):**
-   - Unit test con mocking di Prisma su avvio gioco, timeout 24h, avanzamento step, rilevamento vittoria e OCC.
+   - Unit test con mocking di Prisma su avvio gioco, timeout 24h, avanzamento step, rilevamento vittoria, OCC e ritorno di `ActiveGameResponse`.
 3. **`robustnessQA.test.ts` (25 test):**
    - Test end-to-end e di integrazione sul database reale PostgreSQL: validazione JWT malformati, schemi Zod, rate limiting, anti-cheat su link inesistenti, isolamento multi-tenant (IDOR) e consistenza dei passi.
 4. **`breakBackend.test.ts` (12 test):**
