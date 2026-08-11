@@ -8,7 +8,7 @@ import { validateMiddleware } from '../middlewares/validateMiddleware';
  * Zod validation schema for optional start game override parameter.
  */
 export const startGameSchema = z.object({
-  overrideStartPage: z.string().optional(),
+  overrideStartPage: z.string().trim().max(300, 'Article title cannot exceed 300 characters').optional(),
 });
 
 /**
@@ -22,7 +22,11 @@ export const gameIdParamSchema = z.object({
  * Zod validation schema for step navigation request payload.
  */
 export const makeStepSchema = z.object({
-  targetTitle: z.string().trim().min(1, 'Target Wikipedia page title is required'),
+  targetTitle: z
+    .string()
+    .trim()
+    .min(1, 'Target Wikipedia page title is required')
+    .max(300, 'Target Wikipedia page title cannot exceed 300 characters'),
 });
 
 const router: Router = Router();

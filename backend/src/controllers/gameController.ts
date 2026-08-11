@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { gameService, GameWithSteps, ActiveGameResponse } from '../services/gameService';
+import { gameService, ActiveGameResponse } from '../services/gameService';
 import { Game } from '@prisma/client';
 import { AppError } from '../middlewares/errorMiddleware';
 
