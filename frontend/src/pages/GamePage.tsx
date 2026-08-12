@@ -41,7 +41,11 @@ export const GamePage: React.FC = () => {
 
   const handleStart = async (e: React.FormEvent) => {
     e.preventDefault();
-    await startNewGame(overrideStartPage.trim() || undefined);
+    try {
+      await startNewGame(overrideStartPage.trim() || undefined);
+    } catch {
+      // Error state is already set and managed inside useGameEngine
+    }
   };
 
   const formatSeconds = (totalSecs: number) => {
