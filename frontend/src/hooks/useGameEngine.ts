@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Game, WikiArticleContent } from '../types';
 import { gameApi } from '../api';
@@ -42,7 +42,6 @@ export function useGameEngine(): UseGameEngineReturn {
   const [error, setError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const showToast = useCallback((msg = 'Link non valido o non enciclopedico') => {
     setToastMessage(msg);
@@ -62,19 +61,17 @@ export function useGameEngine(): UseGameEngineReturn {
   useEffect(() => {
     if (game?.status === 'IN_PROGRESS') {
       setElapsedSeconds(calculateElapsed(game.startTime));
-      timerRef.current = setInterval(() => {
+      const timer = setInterval(() => {
         setElapsedSeconds(calculateElapsed(game.startTime));
       }, 1000);
-    } else if (game?.status === 'COMPLETED') {
+      return () => clearInterval(timer);
+    }
+    if (game?.status === 'COMPLETED') {
       setElapsedSeconds(calculateElapsed(game.startTime, game.endTime));
     } else {
       setElapsedSeconds(0);
     }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [game?.status, game?.startTime, game?.endTime]);
+  }, [game?.id, game?.status, game?.startTime, game?.endTime]);
 
   const getErrorMessage = (err: unknown, fallback: string): string => {
     if (axios.isAxiosError(err)) {
