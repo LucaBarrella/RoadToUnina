@@ -62,11 +62,37 @@ function createCorsOptions(): CorsOptions {
 
   return {
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) {
         callback(null, true);
         return;
       }
-      callback(new Error('CORS Policy: Origin not allowed'));
+
+      // Allow if explicit match or wildcard
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+        callback(null, true);
+        return;
+      }
+
+      // Allow any Vercel deployment (production or preview branch)
+      if (
+        origin.endsWith('.vercel.app') ||
+        origin === 'https://road-to-unina.vercel.app'
+      ) {
+        callback(null, true);
+        return;
+      }
+
+      // Allow localhost
+      if (
+        origin.startsWith('http://localhost:') ||
+        origin.startsWith('http://127.0.0.1:')
+      ) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`CORS Policy: Origin ${origin} not allowed`));
     },
     credentials: true,
   };
