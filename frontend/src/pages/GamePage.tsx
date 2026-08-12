@@ -253,30 +253,39 @@ export const GamePage: React.FC = () => {
         icon="warning"
       />
 
-      {/* Error Banner: Sticky above everything, never occluded by HUD */}
+      {/* 
+        FIXED Error Overlay — renders at the very top of the viewport (below Navbar),
+        with z-[45] so it floats above ALL page content (HUDBar, article, sidebar)
+        but below the Navbar (z-50) and modals.
+        Uses fixed positioning so it's completely independent of document flow.
+      */}
       {error && (
         <div
           role="alert"
-          className="sticky top-[64px] z-40 w-full bg-neo-pink text-neo-on-accent p-4 border-b-3 border-neo-black shadow-neo font-space font-bold text-sm sm:text-base flex items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-150"
+          className="fixed top-[64px] left-0 right-0 z-[45] bg-neo-pink text-neo-on-accent px-4 sm:px-6 py-3 sm:py-4 border-b-3 border-neo-black shadow-neo font-space font-bold text-sm sm:text-base flex items-center justify-between gap-4"
+          style={{ minHeight: '52px' }}
         >
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <span aria-hidden="true" className="material-symbols-outlined text-2xl shrink-0">
-              warning
+              error
             </span>
-            <span className="break-words overflow-wrap-anywhere">{error}</span>
+            <span className="break-words" style={{ overflowWrap: 'anywhere' }}>{error}</span>
           </div>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="btn-neo-outline bg-neo-surface text-neo-black text-xs py-1.5 px-3 min-h-0 shrink-0 font-mono shadow-neo-sm hover:translate-x-[1px] hover:translate-y-[1px]"
+            className="bg-neo-surface text-neo-black border-3 border-neo-black px-3 py-1.5 font-mono font-bold text-xs shadow-neo-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all shrink-0 cursor-pointer"
           >
-            Chiudi
+            ✕ Chiudi
           </button>
         </div>
       )}
 
-      {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 md:p-6 flex flex-col gap-6">
+      {/* Main Workspace Layout — extra top padding when error bar is visible */}
+      <main
+        className="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 md:p-6 flex flex-col gap-6"
+        style={error ? { paddingTop: '68px' } : undefined}
+      >
         {/* HUD Bar in standard page flow */}
         <div className="w-full">
           <HUDBar
@@ -292,52 +301,51 @@ export const GamePage: React.FC = () => {
         <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
           {/* Article Canvas (9 Cols) */}
           <div className="md:col-span-9 w-full min-w-0">
+            <WikiRenderer
+              title={currentArticle?.title || game.currentPageTitle}
+              htmlContent={currentArticle?.htmlContent || '<p>Caricamento articolo Wikipedia...</p>'}
+              onNavigate={(title) => makeStep(title)}
+              onInvalidLink={() => showToast('Link non valido o non enciclopedico')}
+              loading={loading}
+            />
+          </div>
 
-          <WikiRenderer
-            title={currentArticle?.title || game.currentPageTitle}
-            htmlContent={currentArticle?.htmlContent || '<p>Caricamento articolo Wikipedia...</p>'}
-            onNavigate={(title) => makeStep(title)}
-            onInvalidLink={() => showToast('Link non valido o non enciclopedico')}
-            loading={loading}
-          />
-        </div>
-
-        {/* Path Traversed History Sidebar (3 Cols) */}
-        <aside aria-label="Cronologia Passi" className="md:col-span-3 sticky top-[180px]">
-          <Card variant="neutral" title="Percorso Effettuato" icon="route">
-            <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
-              {game.steps && game.steps.length > 0 ? (
-                game.steps.map((st, idx) => (
-                  <div key={st.id || idx} className="flex items-start gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="w-7 h-7 bg-neo-yellow text-neo-on-accent border-2 border-neo-black font-mono font-bold text-xs flex items-center justify-center flex-shrink-0"
-                    >
-                      {st.stepOrder}
-                    </span>
-                    <div className="flex-1 overflow-hidden">
-                      <span className="sr-only">Passo {st.stepOrder}: </span>
-                      <span className="font-inter text-sm font-bold block truncate text-neo-black" title={st.pageTitle}>
-                        {st.pageTitle}
+          {/* Path Traversed History Sidebar (3 Cols) */}
+          <aside aria-label="Cronologia Passi" className="md:col-span-3 sticky top-[180px]">
+            <Card variant="neutral" title="Percorso Effettuato" icon="route">
+              <div className="flex flex-col gap-3 max-h-[500px] overflow-y-auto pr-1">
+                {game.steps && game.steps.length > 0 ? (
+                  game.steps.map((st, idx) => (
+                    <div key={st.id || idx} className="flex items-start gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="w-7 h-7 bg-neo-yellow text-neo-on-accent border-2 border-neo-black font-mono font-bold text-xs flex items-center justify-center flex-shrink-0"
+                      >
+                        {st.stepOrder}
                       </span>
+                      <div className="flex-1 overflow-hidden">
+                        <span className="sr-only">Passo {st.stepOrder}: </span>
+                        <span className="font-inter text-sm font-bold block truncate text-neo-black" title={st.pageTitle}>
+                          {st.pageTitle}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))
-              ) : (
-                <div className="font-mono text-xs text-neo-black">Nessun passo ancora effettuato.</div>
-              )}
+                  ))
+                ) : (
+                  <div className="font-mono text-xs text-neo-black">Nessun passo ancora effettuato.</div>
+                )}
 
-              {detectLoop() && (
-                <div
-                  role="alert"
-                  className="mt-2 bg-neo-pink text-neo-on-accent p-2 border-2 border-neo-black font-mono text-xs font-bold animate-pulse text-center"
-                >
-                  ⚠️ Loop Rilevato! (Stato già visitato)
-                </div>
-              )}
-            </div>
-          </Card>
-        </aside>
+                {detectLoop() && (
+                  <div
+                    role="alert"
+                    className="mt-2 bg-neo-pink text-neo-on-accent p-2 border-2 border-neo-black font-mono text-xs font-bold animate-pulse text-center"
+                  >
+                    ⚠️ Loop Rilevato! (Stato già visitato)
+                  </div>
+                )}
+              </div>
+            </Card>
+          </aside>
         </div>
       </main>
     </div>
