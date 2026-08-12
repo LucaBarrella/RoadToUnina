@@ -1,152 +1,61 @@
 import { GameStatus } from '@prisma/client';
 import { prisma } from '../config/db';
 
-/**
- * Public representation of a game user.
- */
+/** Public view representation of user details. */
 export interface PublicUserView {
-  /**
-   * Unique user identifier.
-   */
   id: string;
-
-  /**
-   * Public display username.
-   */
   username: string;
 }
 
-/**
- * Public representation of an individual game navigation step.
- */
+/** Public view of an individual game step. */
 export interface CompletedGameStepView {
-  /**
-   * 1-based sequential step order index.
-   */
   stepOrder: number;
-
-  /**
-   * Wikipedia page title visited at this step.
-   */
   pageTitle: string;
 }
 
-/**
- * Public completed game view with steps and user info for feed exploration.
- */
+/** Detailed public view of a completed game session. */
 export interface CompletedGameView {
-  /**
-   * Unique identifier of the game.
-   */
   id: string;
-
-  /**
-   * Public user details of the player.
-   */
   user: PublicUserView;
-
-  /**
-   * Starting Wikipedia article title.
-   */
   startPageTitle: string;
-
-  /**
-   * Current / final Wikipedia article title reached.
-   */
   currentPageTitle: string;
-
-  /**
-   * Total number of navigation clicks performed.
-   */
   clickCount: number;
-
-  /**
-   * Game start timestamp.
-   */
   startTime: Date;
-
-  /**
-   * Game completion timestamp.
-   */
   endTime: Date | null;
-
-  /**
-   * Total elapsed time in rounded seconds.
-   */
   durationSeconds: number | null;
-
-  /**
-   * Ordered sequence of steps taken from start to target.
-   */
   steps: CompletedGameStepView[];
 }
 
-/**
- * Public leaderboard entry ranking best player statistics.
- */
+/** Global leaderboard entry for a player. */
 export interface LeaderboardEntry {
-  /**
-   * Leaderboard rank position (1-indexed).
-   */
   rank: number;
-
-  /**
-   * Unique user identifier.
-   */
   userId: string;
-
-  /**
-   * Player's username.
-   */
   username: string;
-
-  /**
-   * Nested public user view.
-   */
   user: PublicUserView;
-
-  /**
-   * Total number of completed games.
-   */
   completedGamesCount: number;
-
-  /**
-   * Lowest click count achieved among all completed games.
-   */
   bestClickCount: number;
-
-  /**
-   * Shortest completion duration in seconds achieved.
-   */
   bestDurationSeconds: number;
 }
 
 /**
- * Computes elapsed duration in whole seconds between start and end timestamps.
- *
- * @param {Date} startTime - The game start timestamp.
- * @param {Date | null} endTime - The game completion timestamp, or null if ongoing.
- * @returns {number | null} Duration in rounded seconds, or null if endTime is null.
+ * Calculates duration in seconds between game start and completion timestamps.
+ * @param startTime Game start date.
+ * @param endTime Game completion date or null.
+ * @returns Duration in whole seconds, or null if uncompleted.
  */
 export function calculateDurationInSeconds(startTime: Date, endTime: Date | null): number | null {
   if (!endTime) return null;
   return Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 1000);
 }
 
-/**
- * Service managing public endpoints for completed games and global leaderboards.
- */
+/** Service managing public queries for completed games and global leaderboards. */
 export class PublicService {
   /**
-   * Retrieves recent completed games with their full navigation step sequence for public exploration.
-   *
-   * @param {number} [limit=20] - Maximum number of completed games to fetch. Defaults to 20.
-   * @returns {Promise<CompletedGameView[]>} List of completed games with step trails.
-   *
-   * @example
-   * const games = await publicService.getCompletedGames(10);
+   * Retrieves recently completed games with navigation steps.
+   * @param limit Max games to return (default 20).
+   * @returns List of completed games.
    */
-  public async getCompletedGames(limit: number = 20): Promise<CompletedGameView[]> {
+  public async getCompletedGames(limit = 20): Promise<CompletedGameView[]> {
     const games = await prisma.game.findMany({
       where: { status: GameStatus.COMPLETED },
       orderBy: { endTime: 'desc' },
@@ -157,7 +66,7 @@ export class PublicService {
       },
     });
 
-    return games.map((game): CompletedGameView => ({
+    return games.map((game) => ({
       id: game.id,
       user: game.user,
       startPageTitle: game.startPageTitle,
@@ -171,27 +80,14 @@ export class PublicService {
   }
 
   /**
-   * Retrieves the global player leaderboard.
-   * Ranking criteria:
-   * 1. Lowest click count (`bestClickCount ASC`)
-   * 2. Shortest duration (`bestDurationSeconds ASC`)
-   * 3. Total completed games (`completedGamesCount DESC`)
-   *
-   * @param {number} [limit=50] - Maximum number of leaderboard rows to return. Defaults to 50.
-   * @returns {Promise<LeaderboardEntry[]>} Sorted leaderboard entries.
-   *
-   * @example
-   * const leaderboard = await publicService.getLeaderboard(50);
+   * Computes global leaderboard rankings (clicks ASC, duration ASC, games DESC).
+   * @param limit Max rankings to return (default 50).
+   * @returns Ranked leaderboard list.
    */
-  public async getLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
+  public async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
     const completedGames = await prisma.game.findMany({
-      where: {
-        status: GameStatus.COMPLETED,
-        endTime: { not: null },
-      },
-      include: {
-        user: { select: { id: true, username: true } },
-      },
+      where: { status: GameStatus.COMPLETED, endTime: { not: null } },
+      include: { user: { select: { id: true, username: true } } },
     });
 
     interface RawUserStats {
@@ -206,7 +102,6 @@ export class PublicService {
 
     for (const game of completedGames) {
       if (!game.endTime) continue;
-
       const durationSeconds = calculateDurationInSeconds(game.startTime, game.endTime) ?? 0;
       const existing = userStatsMap.get(game.userId);
 
@@ -222,7 +117,6 @@ export class PublicService {
       }
 
       existing.completedGamesCount += 1;
-
       const isFewerClicks = game.clickCount < existing.bestClickCount;
       const isSameClicksFaster = game.clickCount === existing.bestClickCount && durationSeconds < existing.bestDurationSeconds;
 
@@ -233,23 +127,16 @@ export class PublicService {
     }
 
     const sortedStats = Array.from(userStatsMap.values()).sort((a, b) => {
-      if (a.bestClickCount !== b.bestClickCount) {
-        return a.bestClickCount - b.bestClickCount;
-      }
-      if (a.bestDurationSeconds !== b.bestDurationSeconds) {
-        return a.bestDurationSeconds - b.bestDurationSeconds;
-      }
+      if (a.bestClickCount !== b.bestClickCount) return a.bestClickCount - b.bestClickCount;
+      if (a.bestDurationSeconds !== b.bestDurationSeconds) return a.bestDurationSeconds - b.bestDurationSeconds;
       return b.completedGamesCount - a.completedGamesCount;
     });
 
-    return sortedStats.slice(0, limit).map((entry, index): LeaderboardEntry => ({
+    return sortedStats.slice(0, limit).map((entry, index) => ({
       rank: index + 1,
       userId: entry.userId,
       username: entry.username,
-      user: {
-        id: entry.userId,
-        username: entry.username,
-      },
+      user: { id: entry.userId, username: entry.username },
       completedGamesCount: entry.completedGamesCount,
       bestClickCount: entry.bestClickCount,
       bestDurationSeconds: entry.bestDurationSeconds,
@@ -257,4 +144,6 @@ export class PublicService {
   }
 }
 
-export const publicService: PublicService = new PublicService();
+export const publicService = new PublicService();
+
+

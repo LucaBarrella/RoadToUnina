@@ -1,45 +1,21 @@
 import { Router } from 'express';
 import { z, ZodType } from 'zod';
-import { authController } from '../controllers/authController';
+import { authService, RegisterDTO, LoginDTO, AuthResponse, UserProfile } from '../services/authService';
 import { validateMiddleware } from '../middlewares/validateMiddleware';
 import { authMiddleware } from '../middlewares/authMiddleware';
-import { RegisterDTO, LoginDTO } from '../services/authService';
+import { AppError } from '../middlewares/errorMiddleware';
 
-/**
- * Zod validation schema for user registration payload.
- * Enforces string limits to prevent memory abuse or giant payload attacks.
- */
+/** Zod validation schema for registration payload. */
 export const registerSchema: ZodType<RegisterDTO> = z.object({
-  email: z
-    .string()
-    .trim()
-    .max(255, 'Email cannot exceed 255 characters')
-    .email('Invalid email address format'),
-  username: z
-    .string()
-    .trim()
-    .min(3, 'Username must be at least 3 characters long')
-    .max(30, 'Username cannot exceed 30 characters'),
-  password: z
-    .string()
-    .min(6, 'Password must be at least 6 characters long')
-    .max(128, 'Password cannot exceed 128 characters'),
+  email: z.string().trim().max(255, 'Email cannot exceed 255 characters').email('Invalid email address format'),
+  username: z.string().trim().min(3, 'Username must be at least 3 characters long').max(30, 'Username cannot exceed 30 characters'),
+  password: z.string().min(6, 'Password must be at least 6 characters long').max(128, 'Password cannot exceed 128 characters'),
 });
 
-/**
- * Zod validation schema for user login payload.
- * Enforces max string length limits to prevent bcrypt CPU starvation attacks.
- */
+/** Zod validation schema for login payload. */
 export const loginSchema: ZodType<LoginDTO> = z.object({
-  login: z
-    .string()
-    .trim()
-    .min(1, 'Email or username is required')
-    .max(255, 'Login cannot exceed 255 characters'),
-  password: z
-    .string()
-    .min(1, 'Password is required')
-    .max(128, 'Password cannot exceed 128 characters'),
+  login: z.string().trim().min(1, 'Email or username is required').max(255, 'Login cannot exceed 255 characters'),
+  password: z.string().min(1, 'Password is required').max(128, 'Password cannot exceed 128 characters'),
 });
 
 const router: Router = Router();
@@ -47,34 +23,47 @@ const router: Router = Router();
 /**
  * @route POST /api/auth/register
  * @description Registers a new user account.
- * @access Public
+ * @access Public (201 Created / 400 Bad Request)
  */
-router.post(
-  '/register',
-  validateMiddleware(registerSchema, 'body'),
-  (req, res, next) => authController.register(req, res, next)
-);
+router.post('/register', validateMiddleware(registerSchema, 'body'), async (req, res, next) => {
+  try {
+    const result: AuthResponse = await authService.register(req.body);
+    res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * @route POST /api/auth/login
- * @description Authenticates user and issues a JWT token.
- * @access Public
+ * @description Authenticates user and returns JWT token.
+ * @access Public (200 OK / 401 Unauthorized)
  */
-router.post(
-  '/login',
-  validateMiddleware(loginSchema, 'body'),
-  (req, res, next) => authController.login(req, res, next)
-);
+router.post('/login', validateMiddleware(loginSchema, 'body'), async (req, res, next) => {
+  try {
+    const result: AuthResponse = await authService.login(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 /**
  * @route GET /api/auth/me
- * @description Fetches profile details of the authenticated user.
- * @access Protected
+ * @description Retrieves current authenticated user profile.
+ * @access Protected (200 OK / 401 Unauthorized / 404 Not Found)
  */
-router.get(
-  '/me',
-  authMiddleware,
-  (req, res, next) => authController.me(req, res, next)
-);
+router.get('/me', authMiddleware, async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) throw new AppError('Unauthorized: User session missing', 401);
+    const user: UserProfile = await authService.getProfile(userId);
+    res.status(200).json(user);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;
+
+

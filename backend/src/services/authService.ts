@@ -4,96 +4,53 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db';
 import { AppError } from '../middlewares/errorMiddleware';
 
-/**
- * Public profile data of a User without sensitive password hash.
- */
+/** User profile representation excluding sensitive password hash. */
 export type UserProfile = Omit<User, 'password'>;
 
-/**
- * Payload interface for user registration.
- */
+/** Payload DTO for user registration. */
 export interface RegisterDTO {
-  /**
-   * User's unique email address.
-   */
   email: string;
-
-  /**
-   * User's unique public username.
-   */
   username: string;
-
-  /**
-   * User's raw plaintext password.
-   */
   password: string;
 }
 
-/**
- * Payload interface for user login.
- */
+/** Payload DTO for user authentication. */
 export interface LoginDTO {
-  /**
-   * User's email or username identifier.
-   */
   login: string;
-
-  /**
-   * User's raw plaintext password.
-   */
   password: string;
 }
 
-/**
- * Interface for auth response containing token and sanitized user details.
- */
+/** Auth response bundling signed JWT token and user profile. */
 export interface AuthResponse {
-  /**
-   * Signed JWT access token.
-   */
   token: string;
-
-  /**
-   * User profile data excluding the password hash.
-   */
   user: UserProfile;
 }
 
 /**
- * Strips the password hash from a Prisma User record.
- *
- * @param {User} user - Complete Prisma user entity.
- * @returns {UserProfile} Sanitized user profile.
+ * Strips password hash from User record.
+ * @param user Full user entity.
+ * @returns User profile without password.
  */
 export function sanitizeUser(user: User): UserProfile {
   const { password: _, ...profile } = user;
   return profile;
 }
 
-/**
- * Service managing user authentication, registration, password hashing, and token generation.
- */
+/** Service managing user authentication, registration, and profile lookup. */
 export class AuthService {
   /**
-   * Registers a new user with a bcrypt-hashed password and generates a signed JWT token.
-   *
-   * @param {RegisterDTO} dto - User registration credentials.
-   * @returns {Promise<AuthResponse>} Auth response containing token and user profile.
-   * @throws {AppError} 400 Bad Request if email or username is already taken.
-   *
-   * @example
-   * const auth = await authService.register({ email: 'a@b.com', username: 'user', password: 'secretpassword' });
+   * Registers a new user account and returns an access token.
+   * @param dto Registration payload.
+   * @returns AuthResponse with JWT and profile.
+   * @throws AppError 400 if email or username is already taken.
    */
   public async register(dto: RegisterDTO): Promise<AuthResponse> {
-    const normalizedEmail: string = dto.email.toLowerCase().trim();
-    const normalizedUsername: string = dto.username.trim();
+    const normalizedEmail = dto.email.toLowerCase().trim();
+    const normalizedUsername = dto.username.trim();
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: normalizedEmail },
-          { username: normalizedUsername },
-        ],
+        OR: [{ email: normalizedEmail }, { username: normalizedUsername }],
       },
     });
 
@@ -115,87 +72,56 @@ export class AuthService {
       },
     });
 
-    const token = this.generateToken(user.id, user.username);
-
     return {
-      token,
+      token: this.generateToken(user.id, user.username),
       user: sanitizeUser(user),
     };
   }
 
   /**
-   * Authenticates a user with email/username and password.
-   *
-   * @param {LoginDTO} dto - User login credentials.
-   * @returns {Promise<AuthResponse>} Auth response containing token and user profile.
-   * @throws {AppError} 401 Unauthorized if credentials do not match any user.
-   *
-   * @example
-   * const auth = await authService.login({ login: 'user@example.com', password: 'secretpassword' });
+   * Authenticates user credentials and issues a JWT token.
+   * @param dto Login credentials payload.
+   * @returns AuthResponse with JWT and profile.
+   * @throws AppError 401 if credentials are invalid.
    */
   public async login(dto: LoginDTO): Promise<AuthResponse> {
-    const loginIdentifier: string = dto.login.toLowerCase().trim();
+    const loginIdentifier = dto.login.toLowerCase().trim();
 
     const user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: loginIdentifier },
-          { username: dto.login.trim() },
-        ],
+        OR: [{ email: loginIdentifier }, { username: dto.login.trim() }],
       },
     });
 
-    if (!user) {
+    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new AppError('Invalid credentials', 401);
     }
-
-    const isMatch = await bcrypt.compare(dto.password, user.password);
-    if (!isMatch) {
-      throw new AppError('Invalid credentials', 401);
-    }
-
-    const token = this.generateToken(user.id, user.username);
 
     return {
-      token,
+      token: this.generateToken(user.id, user.username),
       user: sanitizeUser(user),
     };
   }
 
   /**
-   * Retrieves profile details for a given user ID without password hash.
-   *
-   * @param {string} userId - User unique identifier.
-   * @returns {Promise<UserProfile>} User profile record.
-   * @throws {AppError} 404 Not Found if user does not exist.
-   *
-   * @example
-   * const profile = await authService.getProfile('uuid-123');
+   * Fetches user profile by user ID.
+   * @param userId User ID.
+   * @returns User profile.
+   * @throws AppError 404 if user not found.
    */
   public async getProfile(userId: string): Promise<UserProfile> {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
-
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new AppError('User not found', 404);
     return sanitizeUser(user);
   }
 
-  /**
-   * Generates a signed JWT access token.
-   *
-   * @param {string} id - User ID.
-   * @param {string} username - User username.
-   * @returns {string} Signed JWT token.
-   * @private
-   */
+  /** Generates signed JWT access token. */
   private generateToken(id: string, username: string): string {
-    const secret: string = process.env.JWT_SECRET || 'default_secret';
+    const secret = process.env.JWT_SECRET || 'default_secret';
     return jwt.sign({ id, username }, secret, { expiresIn: '7d' });
   }
 }
 
-export const authService: AuthService = new AuthService();
+export const authService = new AuthService();
+
+
