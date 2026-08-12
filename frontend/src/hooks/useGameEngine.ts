@@ -121,7 +121,7 @@ export function useGameEngine(): UseGameEngineReturn {
         setCurrentArticle(null);
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Errore durante il caricamento della partita attiva.';
+      const msg = getErrorMessage(err, 'Errore durante il caricamento della partita attiva.');
       setError(msg);
     } finally {
       setLoading(false);

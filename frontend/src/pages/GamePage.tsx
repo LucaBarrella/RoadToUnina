@@ -253,41 +253,45 @@ export const GamePage: React.FC = () => {
         icon="warning"
       />
 
-      {/* Sticky HUD Bar */}
-      <div className="sticky top-[64px] sm:top-[68px] z-30 px-2 sm:px-4 py-2 max-w-[1600px] w-full mx-auto">
-        <HUDBar
-          currentTitle={currentArticle?.title || game.currentPageTitle}
-          targetTitle={game.targetPageTitle}
-          elapsedSeconds={elapsedSeconds}
-          clickCount={game.clickCount}
-          onAbandon={abandonGame}
-        />
-      </div>
-
       {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 md:p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        {/* Article Canvas (9 Cols) */}
-        <div className="md:col-span-9 w-full min-w-0">
-          {error && (
-            <div
-              role="alert"
-              className="mb-6 bg-neo-pink text-neo-on-accent p-4 border-3 border-neo-black shadow-neo font-space font-bold text-sm sm:text-base flex items-start sm:items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-150"
-            >
-              <div className="flex items-center gap-3">
-                <span aria-hidden="true" className="material-symbols-outlined text-2xl shrink-0">
-                  warning
-                </span>
-                <span className="break-words">{error}</span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setError(null)}
-                className="btn-neo-outline bg-neo-surface text-neo-black text-xs py-1 px-2 min-h-0 shrink-0 font-mono"
-              >
-                Chiudi
-              </button>
+      <main className="flex-1 max-w-[1600px] w-full mx-auto p-3 sm:p-4 md:p-6 flex flex-col gap-6">
+        {/* Error Banner: Positioned cleanly at the top of the workspace */}
+        {error && (
+          <div
+            role="alert"
+            className="w-full bg-neo-pink text-neo-on-accent p-4 border-3 border-neo-black shadow-neo font-space font-bold text-sm sm:text-base flex items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-150"
+          >
+            <div className="flex items-center gap-3">
+              <span aria-hidden="true" className="material-symbols-outlined text-2xl shrink-0">
+                warning
+              </span>
+              <span className="break-words">{error}</span>
             </div>
-          )}
+            <button
+              type="button"
+              onClick={() => setError(null)}
+              className="btn-neo-outline bg-neo-surface text-neo-black text-xs py-1.5 px-3 min-h-0 shrink-0 font-mono shadow-neo-sm hover:translate-x-[1px] hover:translate-y-[1px]"
+            >
+              Chiudi
+            </button>
+          </div>
+        )}
+
+        {/* HUD Bar in standard page flow */}
+        <div className="w-full">
+          <HUDBar
+            currentTitle={currentArticle?.title || game.currentPageTitle}
+            targetTitle={game.targetPageTitle}
+            elapsedSeconds={elapsedSeconds}
+            clickCount={game.clickCount}
+            onAbandon={abandonGame}
+          />
+        </div>
+
+        {/* Grid Canvas */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          {/* Article Canvas (9 Cols) */}
+          <div className="md:col-span-9 w-full min-w-0">
 
           <WikiRenderer
             title={currentArticle?.title || game.currentPageTitle}
@@ -334,6 +338,7 @@ export const GamePage: React.FC = () => {
             </div>
           </Card>
         </aside>
+        </div>
       </main>
     </div>
   );
