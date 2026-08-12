@@ -249,13 +249,19 @@ test.describe('RoadToUnina — E2E & Automated Playtest Suite', () => {
     });
     expect([201, 400]).toContain(startRes.status());
 
-    // Fetch active game id
-    const activeRes = await request.get('http://localhost:3001/api/games/active', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    expect(activeRes.status()).toBe(200);
-    const activeData = await activeRes.json();
-    const gameId = activeData?.game?.id;
+    let gameId: string;
+    if (startRes.status() === 201) {
+      const startData = await startRes.json();
+      gameId = startData.game.id;
+    } else {
+      // Fetch active game id
+      const activeRes = await request.get('http://localhost:3001/api/games/active', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      expect(activeRes.status()).toBe(200);
+      const activeData = await activeRes.json();
+      gameId = activeData?.game?.id;
+    }
     expect(gameId).toBeTruthy();
 
     // Attempt illegal step (anti-cheat non-existent link in Napoli)
