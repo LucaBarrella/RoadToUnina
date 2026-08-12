@@ -38,7 +38,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 Install All Monorepo Dependencies
-        run: npm ci
+        run: npm ci --include=optional
 
       - name: ⚡ Generate Prisma Client & Run Migrations
         working-directory: backend
@@ -83,7 +83,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 Install All Monorepo Dependencies
-        run: npm ci
+        run: npm ci --include=optional
 
       - name: 🔨 Typecheck & Build Vite SPA
         working-directory: frontend
@@ -121,7 +121,7 @@ jobs:
           cache: 'npm'
 
       - name: 📦 Install All Monorepo Dependencies
-        run: npm ci
+        run: npm ci --include=optional
 
       - name: 🎭 Install Playwright Browsers
         working-directory: frontend
