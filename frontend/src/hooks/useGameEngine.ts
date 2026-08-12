@@ -176,17 +176,22 @@ export function useGameEngine(): UseGameEngineReturn {
       setGame(activeData.game);
       setCurrentArticle(activeData.currentArticle);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && (err.response?.status === 400 || err.status === 400)) {
-        // Bad request / invalid link clicked -> Show discreet temporary toast instead of permanent error banner
-        showToast('Link non valido o non enciclopedico');
+      if (axios.isAxiosError(err) && (err.response?.status === 400 || err.response?.status === 404 || err.status === 400)) {
+        // 400 Bad Request or 404 Not Found from a link click -> transient toast, not a permanent banner
+        const toastMsg = err.response?.status === 404
+          ? 'Pagina Wikipedia non trovata. Prova un altro link.'
+          : 'Link non valido o non enciclopedico';
+        showToast(toastMsg);
       } else {
         const msg = getErrorMessage(err, 'Mossa non valida o errore di rete.');
         if (
           msg.includes('400') ||
+          msg.includes('404') ||
           msg.toLowerCase().includes('non valido') ||
+          msg.toLowerCase().includes('non trovata') ||
           msg.toLowerCase().includes('invalid step')
         ) {
-          showToast('Link non valido o non enciclopedico');
+          showToast(msg);
         } else {
           setError(msg);
         }
@@ -205,7 +210,7 @@ export function useGameEngine(): UseGameEngineReturn {
       setGame(abandonedGame);
       setCurrentArticle(null);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Errore durante l'abbandono della partita.";
+      const msg = getErrorMessage(err, "Errore durante l'abbandono della partita.");
       setError(msg);
     } finally {
       setLoading(false);
