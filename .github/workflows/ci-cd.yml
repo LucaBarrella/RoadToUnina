@@ -52,6 +52,9 @@ jobs:
 
       - name: 🔨 Compile TypeScript
         working-directory: backend
+        env:
+          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/roadtounina_test?schema=public"
+          DIRECT_URL: "postgresql://postgres:postgrespassword@localhost:5432/roadtounina_test?schema=public"
         run: npm run build
 
       - name: 🧪 Run Backend Vitest Suite (53 Tests)

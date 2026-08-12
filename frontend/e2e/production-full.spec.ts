@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Verify complete end-to-end user experience on LIVE production (Vercel + Render)', async ({ page }) => {
+  test.skip(!process.env.RUN_LIVE_TEST, 'Skipping live production test by default during local/CI suite run');
   const testId = Date.now().toString().slice(-6);
   const testUser = {
     username: `live_runner_${testId}`,
