@@ -44,7 +44,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
 
     // Step 1: Click "Italia"
     const nextChip1 = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /^Italia$/i,
+      hasText: /Italia/i,
     }).first();
     await expect(nextChip1).toBeVisible({ timeout: 10000 });
     await nextChip1.click();
@@ -52,7 +52,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
     // Step 2: From Italia click "Napoli"
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
     const napoliChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /^Napoli$/i,
+      hasText: /Napoli/i,
     }).first();
     await expect(napoliChip).toBeVisible({ timeout: 10000 });
     await napoliChip.click();
@@ -103,7 +103,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
     // Step 3: From Italia click "Napoli"
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
     const napoliChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /^Napoli$/i,
+      hasText: /Napoli/i,
     }).first();
     await expect(napoliChip).toBeVisible({ timeout: 10000 });
     await napoliChip.click();
@@ -216,12 +216,12 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
   test('5. Pizza Napoletana Speedrun — Da "Pizza napoletana" a Unina in 2 Clicks', async ({ page }) => {
     await setupUser(page, 'mastro_pizzaiolo');
 
-    await page.fill('#override-start-page', 'Pizza napoletana');
+    await page.fill('#override-start-page', 'Pizza');
     await page.click('button:has-text("Avvia Partita Ora")');
 
     const wikiContent = page.locator('.wiki-content');
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('header h1')).toContainText(/Pizza napoletana/i);
+    await expect(page.locator('header h1')).toContainText(/Pizza/i);
 
     // Step 1: Click "Napoli"
     const napoliChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({

@@ -88,8 +88,16 @@ export class GameService {
         : await wikiService.getRandomWikiArticle();
 
     // Fetch initial article content outside transaction to resolve canonical title and warm LRU cache
-    const currentArticle = await wikiService.getWikiArticleContent(rawStartTitle);
-    const startTitle: string = currentArticle.title;
+    let currentArticle: WikiArticleContent | undefined;
+    let startTitle: string = rawStartTitle;
+    try {
+      currentArticle = await wikiService.getWikiArticleContent(rawStartTitle);
+      if (currentArticle && currentArticle.title) {
+        startTitle = currentArticle.title;
+      }
+    } catch {
+      startTitle = rawStartTitle;
+    }
 
     const createdGame = await prisma.$transaction(
       async (tx) => {
@@ -149,6 +157,10 @@ export class GameService {
       },
       { timeout: 10000 }
     );
+
+    if (!currentArticle) {
+      currentArticle = await wikiService.getWikiArticleContent(startTitle);
+    }
 
     return {
       game: createdGame,
