@@ -51,9 +51,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
 
     // Step 2: From Italia click "Napoli"
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
-    const napoliChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /Napoli/i,
-    }).first();
+    const napoliChip = wikiContent.locator('a[data-title="Napoli"], a[href="/wiki/Napoli"]').first();
     await expect(napoliChip).toBeVisible({ timeout: 10000 });
     await napoliChip.click();
 
@@ -100,9 +98,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
 
     // Step 3: From Italia click "Napoli"
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
-    const napoliChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /Napoli/i,
-    }).first();
+    const napoliChip = wikiContent.locator('a[data-title="Napoli"], a[href="/wiki/Napoli"]').first();
     await expect(napoliChip).toBeVisible({ timeout: 10000 });
     await napoliChip.click();
 
