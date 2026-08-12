@@ -130,23 +130,78 @@ export function useGameEngine(): UseGameEngineReturn {
 
   const getErrorMessage = (err: unknown, fallback: string): string => {
     if (axios.isAxiosError(err)) {
-      const serverErr = err.response?.data?.error;
-      if (typeof serverErr === 'string' && serverErr.trim().length > 0) {
-        return serverErr;
+      const data = err.response?.data as any;
+      let serverErr: string | undefined;
+      if (typeof data === 'string') {
+        serverErr = data;
+      } else if (data && typeof data === 'object') {
+        serverErr =
+          typeof data.error === 'string'
+            ? data.error
+            : typeof data.message === 'string'
+            ? data.message
+            : undefined;
       }
+
+      if (serverErr && serverErr.trim().length > 0) {
+        const lower = serverErr.toLowerCase();
+        if (lower.includes('already has an active game')) {
+          return 'Hai già una partita attiva in corso. Puoi continuare la partita o abbandonarla per crearne una nuova.';
+        }
+        if (lower.includes('validation error') || lower.includes('invalid or empty')) {
+          return 'Titolo della voce non valido. Inserisci un titolo corretto o lascia il campo vuoto.';
+        }
+        if (lower.includes('non trovata') || lower.includes('not found')) {
+          return 'Pagina Wikipedia non trovata. Inserisci un altro titolo o lascia il campo vuoto per una voce casuale.';
+        }
+        if (lower.includes('invalid step')) {
+          return 'Link non valido o non presente nella pagina corrente.';
+        }
+        if (!/request failed with status code/i.test(serverErr)) {
+          return serverErr;
+        }
+      }
+
       if (err.response?.status === 404) {
         return 'Pagina Wikipedia non trovata. Inserisci un altro titolo o lascia il campo vuoto per una voce casuale.';
       }
-      if (err.response?.status === 502) {
-        return 'Errore di comunicazione con Wikipedia. Riprova tra qualche istante.';
+      if (err.response?.status === 400) {
+        return 'Richiesta non valida. Verifica i dati inseriti o ricarica la pagina.';
+      }
+      if (err.response?.status === 401) {
+        return 'Sessione di accesso scaduta. Effettua nuovamente il login.';
+      }
+      if (err.response?.status === 403) {
+        return 'Accesso negato o non autorizzato.';
+      }
+      if (err.response?.status === 409) {
+        return 'Conflitto di sincronizzazione: la partita è già avanzata. Ricarica la pagina.';
+      }
+      if (err.response?.status === 502 || err.response?.status === 504) {
+        return 'Errore di comunicazione con i server di Wikipedia. Riprova tra qualche istante.';
+      }
+      if (err.response?.status === 500) {
+        return 'Errore interno del server. Riprova tra qualche istante.';
       }
     }
+
     if (err instanceof Error && err.message) {
-      if (err.message.includes('404')) {
+      const lower = err.message.toLowerCase();
+      if (lower.includes('404') || lower.includes('not found')) {
         return 'Pagina Wikipedia non trovata. Inserisci un altro titolo o lascia il campo vuoto per una voce casuale.';
+      }
+      if (lower.includes('400')) {
+        return 'Richiesta non valida. Verifica i dati inseriti o ricarica la pagina.';
+      }
+      if (lower.includes('network error') || lower.includes('timeout') || lower.includes('econnrefused')) {
+        return 'Impossibile connettersi al server. Verifica la connessione di rete.';
+      }
+      if (/request failed with status code/i.test(err.message)) {
+        return fallback;
       }
       return err.message;
     }
+
     return fallback;
   };
 
@@ -159,6 +214,23 @@ export function useGameEngine(): UseGameEngineReturn {
       setCurrentArticle(activeData.currentArticle);
       return activeData.game;
     } catch (err: unknown) {
+      // If user already has an active game, seamlessly load and transition into it
+      if (
+        axios.isAxiosError(err) &&
+        (err.response?.status === 400 ||
+          (err.response?.data as any)?.error?.includes('active game'))
+      ) {
+        try {
+          const activeData = await gameApi.getActiveGame();
+          if (activeData && activeData.game) {
+            setGame(activeData.game);
+            setCurrentArticle(activeData.currentArticle);
+            return activeData.game;
+          }
+        } catch {
+          // If active game loading also fails, proceed to display friendly error
+        }
+      }
       const msg = getErrorMessage(err, 'Impossibile avviare una nuova partita.');
       setError(msg);
       throw err;

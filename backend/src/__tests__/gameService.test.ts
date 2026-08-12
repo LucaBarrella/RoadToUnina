@@ -63,6 +63,12 @@ describe('Title Normalization Utility', () => {
 describe('GameService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockedWikiService.getRandomWikiArticle.mockResolvedValue('Vesuvio');
+    mockedWikiService.getWikiArticleContent.mockResolvedValue({
+      title: 'Vesuvio',
+      htmlContent: '<p>Content</p>',
+      validLinks: ['Napoli', 'Università degli Studi di Napoli Federico II', 'Capri', 'Campania'],
+    });
   });
 
   describe('startGame', () => {

@@ -87,17 +87,9 @@ export class GameService {
         ? overrideStartPage.trim()
         : await wikiService.getRandomWikiArticle();
 
-    // Fetch initial article content outside transaction to resolve canonical title and warm LRU cache
-    let currentArticle: WikiArticleContent | undefined;
-    let startTitle: string = rawStartTitle;
-    try {
-      currentArticle = await wikiService.getWikiArticleContent(rawStartTitle);
-      if (currentArticle && currentArticle.title) {
-        startTitle = currentArticle.title;
-      }
-    } catch {
-      startTitle = rawStartTitle;
-    }
+    // Fetch initial article content BEFORE creating game to validate article existence and resolve canonical title
+    const currentArticle: WikiArticleContent = await wikiService.getWikiArticleContent(rawStartTitle);
+    const startTitle: string = currentArticle.title || rawStartTitle;
 
     const createdGame = await prisma.$transaction(
       async (tx) => {
@@ -158,10 +150,6 @@ export class GameService {
       { timeout: 10000 }
     );
 
-    if (!currentArticle) {
-      currentArticle = await wikiService.getWikiArticleContent(startTitle);
-    }
-
     return {
       game: createdGame,
       currentArticle,
@@ -200,12 +188,21 @@ export class GameService {
       return null;
     }
 
-    const currentArticle = await wikiService.getWikiArticleContent(game.currentPageTitle);
-
-    return {
-      game,
-      currentArticle,
-    };
+    try {
+      const currentArticle = await wikiService.getWikiArticleContent(game.currentPageTitle);
+      return {
+        game,
+        currentArticle,
+      };
+    } catch {
+      // If fetching the Wikipedia article fails (e.g. corrupt title or 404),
+      // mark it abandoned and return null so the user is never trapped in a broken state
+      await prisma.game.update({
+        where: { id: game.id },
+        data: { status: GameStatus.ABANDONED },
+      });
+      return null;
+    }
   }
 
   /**

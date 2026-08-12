@@ -198,12 +198,22 @@ export const GamePage: React.FC = () => {
           {error && (
             <div
               role="alert"
-              className="mb-4 bg-neo-pink text-neo-on-accent p-3 border-3 border-neo-black shadow-neo-sm font-space font-bold text-sm flex items-center gap-2"
+              className="mb-4 bg-neo-pink text-neo-on-accent p-3.5 border-3 border-neo-black shadow-neo-sm font-space font-bold text-sm flex items-center justify-between gap-3 animate-in fade-in duration-150"
             >
-              <span aria-hidden="true" className="material-symbols-outlined text-lg">
-                warning
-              </span>
-              <span>{error}</span>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span aria-hidden="true" className="material-symbols-outlined text-xl shrink-0">
+                  warning
+                </span>
+                <span className="break-words" style={{ overflowWrap: 'anywhere' }}>{error}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                aria-label="Chiudi avviso"
+                className="bg-neo-surface text-neo-black border-2 border-neo-black px-2 py-0.5 font-mono font-bold text-xs shrink-0 cursor-pointer hover:bg-black/10 transition-colors"
+              >
+                ✕
+              </button>
             </div>
           )}
 
