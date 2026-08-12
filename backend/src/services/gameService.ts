@@ -82,10 +82,14 @@ export class GameService {
     userId: string,
     overrideStartPage?: string
   ): Promise<ActiveGameResponse> {
-    const startTitle: string =
+    const rawStartTitle: string =
       overrideStartPage && overrideStartPage.trim().length > 0
         ? overrideStartPage.trim()
         : await wikiService.getRandomWikiArticle();
+
+    // Fetch initial article content outside transaction to resolve canonical title and warm LRU cache
+    const currentArticle = await wikiService.getWikiArticleContent(rawStartTitle);
+    const startTitle: string = currentArticle.title;
 
     const createdGame = await prisma.$transaction(
       async (tx) => {
@@ -145,8 +149,6 @@ export class GameService {
       },
       { timeout: 10000 }
     );
-
-    const currentArticle = await wikiService.getWikiArticleContent(startTitle);
 
     return {
       game: createdGame,
