@@ -59,9 +59,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
 
     // Step 3: From Napoli reach target Unina
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
-    const uninaChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /Università degli Studi di Napoli Federico II/i,
-    }).first();
+    const uninaChip = wikiContent.locator('a[data-title*="Federico II"], a.wiki-chip:has-text("Federico II")').first();
     await expect(uninaChip).toBeVisible({ timeout: 10000 });
     await uninaChip.click();
 
@@ -110,9 +108,7 @@ test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Loca
 
     // Step 4: From Napoli reach Unina target
     await expect(wikiContent).toBeVisible({ timeout: 15000 });
-    const uninaChip = wikiContent.locator('a.wiki-chip, a[href^="/wiki/"]').filter({
-      hasText: /Università degli Studi di Napoli Federico II/i,
-    }).first();
+    const uninaChip = wikiContent.locator('a[data-title*="Federico II"], a.wiki-chip:has-text("Federico II")').first();
     await expect(uninaChip).toBeVisible({ timeout: 10000 });
     await uninaChip.click();
 
