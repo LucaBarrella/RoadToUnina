@@ -88,9 +88,10 @@ export function useGameEngine(): UseGameEngineReturn {
           case 'VALIDATION_ERROR':
             return 'Titolo della voce non valido.';
           case 'WIKI_PAGE_NOT_FOUND':
+            return 'Pagina Wikipedia non trovata.';
           case 'NOT_FOUND':
           case 'GAME_NOT_FOUND':
-            return 'Pagina o risorsa non trovata.';
+            return 'Risorsa non trovata.';
           case 'INVALID_STEP':
             return 'Link non valido o non presente nella pagina corrente.';
           case 'CONCURRENT_CONFLICT':
