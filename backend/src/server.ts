@@ -68,6 +68,7 @@ const corsOptions = {
 
 export const createApp = (): Express => {
   const app = express();
+  app.set('trust proxy', 1);
   app.use(compression());
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' }, contentSecurityPolicy: false }));
   app.use(cors(corsOptions));
