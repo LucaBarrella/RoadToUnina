@@ -5,11 +5,11 @@
 [![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/LucaBarrella/RoadToUnina/actions)
 
-[![Node.js](https://img.shields.io/badge/Node.js-v20+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
-[![Express.js](https://img.shields.io/badge/Express-v5.0-000000?logo=express&logoColor=white)](https://expressjs.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-v5.7-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-v19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Neo--Brutalist-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-v24_LTS-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express-v5.2-000000?logo=express&logoColor=white)](https://expressjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-v5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-v18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v3.4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Vitest](https://img.shields.io/badge/Vitest-53%2F53%20Passing%20(100%25)-44A833?logo=vitest&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
 [![Playwright E2E](https://img.shields.io/badge/Playwright_E2E-19%2F19%20Passing%20(100%25)-2EAD33?logo=playwright&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
 
@@ -176,8 +176,8 @@ npx playwright test
 ┌────────────────────────────────────────────────────────────────────────┐
 │                          ROADTOUNINA STACK                             │
 ├───────────────────┬────────────────────────────────────────────────────┤
-│ Front-end SPA     │ React 19, TypeScript, Vite, Neo-Brutalism Design   │
-│ Back-end API      │ Node.js (v20+), Express 5, TypeScript (Strict)     │
+│ Front-end SPA     │ React 18.3, TypeScript 5.8, Vite 5, Tailwind 3.4   │
+│ Back-end API      │ Node.js 24 LTS, Express 5.2, TypeScript (Strict)   │
 │ Cloud Database    │ Supabase (PostgreSQL 16) con Connection Pooler     │
 │ Database Indexes  │ Indici compositi su Game(userId, status), GameStep │
 │ Cloud Hosting     │ Vercel (Frontend) + Render.com (Backend)           │
@@ -185,7 +185,7 @@ npx playwright test
 │ Security & Anti-XSS│ Sanitize-HTML, Helmet, Rate Limiting, Bcrypt, JWT  │
 │ Network & Proxy   │ Express trust proxy (accurata lettura IP client)  │
 │ Caching Layer     │ LRU Cache In-Memory (TTL 1h, latenza < 1ms)        │
-│ Test Runner       │ Vitest (53/53 passed) + Playwright (19/19 passed)  │
+│ Test Runner       │ Vitest 4.1 (53/53 passed) + Playwright (19/19)     │
 │ CI/CD Pipeline    │ GitHub Actions Workflows (.github/workflows)       │
 └───────────────────┴────────────────────────────────────────────────────┘
 ```
