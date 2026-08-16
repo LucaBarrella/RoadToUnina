@@ -11,7 +11,7 @@
 [![React](https://img.shields.io/badge/React-v19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-Neo--Brutalist-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Vitest](https://img.shields.io/badge/Vitest-53%2F53%20Passing%20(100%25)-44A833?logo=vitest&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
-[![Playwright E2E](https://img.shields.io/badge/Playwright_E2E-18%2F18%20Passing%20(100%25)-2EAD33?logo=playwright&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
+[![Playwright E2E](https://img.shields.io/badge/Playwright_E2E-19%2F19%20Passing%20(100%25)-2EAD33?logo=playwright&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
 
 Elaborato progettuale e implementazione full-stack per la traccia d'esame **RoadToUnina**: una piattaforma web competitiva in cui gli utenti registrati avviano una sfida partendo da una voce casuale estratta in tempo reale da Wikipedia e navigano, **esclusivamente attraverso i collegamenti ipertestuali interni verificati dal server**, per raggiungere la pagina dell'**Università degli Studi di Napoli Federico II** nel minor numero di click e nel minor tempo possibile.
 
@@ -146,12 +146,13 @@ npm test
 - **`wikiService.test.ts` (8 test):** Parsing MediaWiki, estrazione link Namespace 0, DOM sanitization, caching LRU.
 - **`gameService.test.ts` (8 test):** Ciclo di vita del gioco, transizioni di stato atomiche, vittoria e calcolo path.
 
-### 🎭 Test End-to-End (Playwright — 18 Test)
+### 🎭 Test End-to-End (Playwright — 19 Test)
 ```bash
 cd frontend
 npx playwright test
 ```
 - **`gameplay.spec.ts` (6 test):** Registrazione, login, bot gameplay, speedrun completa, verifica leaderboard, anti-cheat & edge cases.
+- **`live-verification.spec.ts` (1 test):** Resilienza, error recovery da titoli non validi e integrità del flusso.
 - **`speedrun-moonknight.spec.ts` (1 test):** Playtest speedrun completo da *"Moon Knight"* a *"Università degli Studi di Napoli Federico II"*.
 - **`thematic-speedruns.spec.ts` (6 test):**
   - 🎬 **Boris (Serie TV)** — *"Dai dai dai!"*: `"Boris (serie televisiva)"` ➔ `"Italia"` ➔ `"Napoli"` ➔ `"Università degli Studi di Napoli Federico II"`
@@ -178,11 +179,13 @@ npx playwright test
 │ Front-end SPA     │ React 19, TypeScript, Vite, Neo-Brutalism Design   │
 │ Back-end API      │ Node.js (v20+), Express 5, TypeScript (Strict)     │
 │ Cloud Database    │ Supabase (PostgreSQL 16) con Connection Pooler     │
+│ Database Indexes  │ Indici compositi su Game(userId, status), GameStep │
 │ Cloud Hosting     │ Vercel (Frontend) + Render.com (Backend)           │
 │ Data Layer / ORM  │ Prisma ORM v7.9, @prisma/adapter-pg                │
 │ Security & Anti-XSS│ Sanitize-HTML, Helmet, Rate Limiting, Bcrypt, JWT  │
+│ Network & Proxy   │ Express trust proxy (accurata lettura IP client)  │
 │ Caching Layer     │ LRU Cache In-Memory (TTL 1h, latenza < 1ms)        │
-│ Test Runner       │ Vitest (53/53 passed) + Playwright (7/7 passed)    │
+│ Test Runner       │ Vitest (53/53 passed) + Playwright (19/19 passed)  │
 │ CI/CD Pipeline    │ GitHub Actions Workflows (.github/workflows)       │
 └───────────────────┴────────────────────────────────────────────────────┘
 ```
