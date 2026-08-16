@@ -75,8 +75,30 @@ export function useGameEngine(): UseGameEngineReturn {
 
   const getErrorMessage = (err: unknown, fallback: string): string => {
     if (axios.isAxiosError(err)) {
-      const data = err.response?.data as { error?: string; message?: string } | string;
+      const data = err.response?.data as { error?: string; message?: string; code?: string } | string;
+      const code = typeof data === 'object' ? data?.code : undefined;
       const serverErr = typeof data === 'string' ? data : data?.error || data?.message;
+
+      // Handle structured machine-readable error codes first
+      if (code) {
+        switch (code) {
+          case 'ACTIVE_GAME_EXISTS':
+            return 'Hai già una partita attiva in corso.';
+          case 'INVALID_WIKI_TITLE':
+          case 'VALIDATION_ERROR':
+            return 'Titolo della voce non valido.';
+          case 'WIKI_PAGE_NOT_FOUND':
+          case 'NOT_FOUND':
+          case 'GAME_NOT_FOUND':
+            return 'Pagina o risorsa non trovata.';
+          case 'INVALID_STEP':
+            return 'Link non valido o non presente nella pagina corrente.';
+          case 'CONCURRENT_CONFLICT':
+            return 'Conflitto di sincronizzazione: la partita è già avanzata.';
+          case 'WIKI_API_ERROR':
+            return 'Errore di comunicazione con Wikipedia.';
+        }
+      }
 
       if (serverErr && typeof serverErr === 'string') {
         const lower = serverErr.toLowerCase();
@@ -126,7 +148,7 @@ export function useGameEngine(): UseGameEngineReturn {
       setCurrentArticle(activeData.currentArticle);
       return activeData.game;
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && (err.response?.status === 400 || (err.response?.data as { error?: string })?.error?.includes('active game'))) {
+      if (axios.isAxiosError(err) && (err.response?.status === 400 || (err.response?.data as { code?: string })?.code === 'ACTIVE_GAME_EXISTS')) {
         try {
           const activeData = await gameApi.getActiveGame();
           if (activeData?.game) {
@@ -145,7 +167,7 @@ export function useGameEngine(): UseGameEngineReturn {
   };
 
   const makeStep = async (targetTitle: string) => {
-    if (!game) return;
+    if (!game || loading) return;
     try {
       setLoading(true);
       setError(null);
@@ -153,7 +175,10 @@ export function useGameEngine(): UseGameEngineReturn {
       setGame(activeData.game);
       setCurrentArticle(activeData.currentArticle);
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && (err.response?.status === 400 || err.response?.status === 404)) {
+      const code = axios.isAxiosError(err) ? (err.response?.data as { code?: string })?.code : undefined;
+      if (code === 'INVALID_STEP' || code === 'WIKI_PAGE_NOT_FOUND') {
+        showToast(code === 'WIKI_PAGE_NOT_FOUND' ? 'Pagina Wikipedia non trovata.' : 'Link non valido o non presente nella pagina corrente.');
+      } else if (axios.isAxiosError(err) && (err.response?.status === 400 || err.response?.status === 404)) {
         showToast(err.response?.status === 404 ? 'Pagina Wikipedia non trovata.' : 'Link non valido o non enciclopedico');
       } else {
         const msg = getErrorMessage(err, 'Mossa non valida o errore di rete.');

@@ -42,17 +42,24 @@ export class AppError extends Error {
   public readonly statusCode: number;
 
   /**
+   * Machine-readable error code (e.g. 'ACTIVE_GAME_EXISTS', 'INVALID_STEP', 'NOT_FOUND').
+   */
+  public readonly code?: string;
+
+  /**
    * Constructs a new AppError instance.
    *
    * @param {string} message - Descriptive error message explaining the failure cause.
    * @param {number} [statusCode=500] - HTTP status code. Defaults to 500.
+   * @param {string} [code] - Machine-readable error code.
    *
    * @example
-   * throw new AppError('Resource not found', 404);
+   * throw new AppError('Resource not found', 404, 'NOT_FOUND');
    */
-  constructor(message: string, statusCode: number = 500) {
+  constructor(message: string, statusCode: number = 500, code?: string) {
     super(message);
     this.statusCode = statusCode;
+    this.code = code;
     Object.setPrototypeOf(this, new.target.prototype);
     Error.captureStackTrace(this, this.constructor);
   }
@@ -105,6 +112,7 @@ export const errorMiddleware = (
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       error: err.message,
+      ...(err.code ? { code: err.code } : {}),
     });
     return;
   }
@@ -117,6 +125,7 @@ export const errorMiddleware = (
 
     res.status(400).json({
       error: 'Validation Error',
+      code: 'VALIDATION_ERROR',
       details,
     });
     return;
@@ -125,6 +134,7 @@ export const errorMiddleware = (
   if (isPayloadTooLargeError(err)) {
     res.status(413).json({
       error: 'Payload Too Large: Request body exceeds size limits',
+      code: 'PAYLOAD_TOO_LARGE',
     });
     return;
   }
@@ -132,6 +142,7 @@ export const errorMiddleware = (
   if (isMalformedJsonError(err)) {
     res.status(400).json({
       error: 'Malformed JSON payload',
+      code: 'MALFORMED_JSON',
     });
     return;
   }
@@ -140,5 +151,6 @@ export const errorMiddleware = (
 
   res.status(500).json({
     error: 'Internal Server Error',
+    code: 'INTERNAL_SERVER_ERROR',
   });
 };

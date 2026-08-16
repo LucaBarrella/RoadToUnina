@@ -39,6 +39,9 @@ model Game {
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
   steps            GameStep[]
+
+  @@index([userId, status])
+  @@index([status, endTime])
 }
 
 model GameStep {
@@ -48,4 +51,7 @@ model GameStep {
   pageTitle String
   stepOrder Int
   createdAt DateTime @default(now())
+
+  @@index([gameId, stepOrder])
 }
+

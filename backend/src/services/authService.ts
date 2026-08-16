@@ -56,9 +56,9 @@ export class AuthService {
 
     if (existingUser) {
       if (existingUser.email.toLowerCase() === normalizedEmail) {
-        throw new AppError('Email is already registered', 400);
+        throw new AppError('Email is already registered', 400, 'EMAIL_ALREADY_REGISTERED');
       }
-      throw new AppError('Username is already taken', 400);
+      throw new AppError('Username is already taken', 400, 'USERNAME_ALREADY_TAKEN');
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -94,7 +94,7 @@ export class AuthService {
     });
 
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
-      throw new AppError('Invalid credentials', 401);
+      throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
     }
 
     return {
@@ -111,7 +111,7 @@ export class AuthService {
    */
   public async getProfile(userId: string): Promise<UserProfile> {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new AppError('User not found', 404);
+    if (!user) throw new AppError('User not found', 404, 'USER_NOT_FOUND');
     return sanitizeUser(user);
   }
 

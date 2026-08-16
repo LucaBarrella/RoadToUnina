@@ -211,7 +211,7 @@ export class WikiService {
    */
   public async getWikiArticleContent(title: string): Promise<WikiArticleContent> {
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
-      throw new AppError('Invalid or empty Wikipedia article title requested', 400);
+      throw new AppError('Invalid or empty Wikipedia article title requested', 400, 'INVALID_WIKI_TITLE');
     }
 
     const cacheKey = normalizeWikiCacheKey(title);
@@ -227,7 +227,7 @@ export class WikiService {
 
       const data = response.data;
       if (!data || typeof data !== 'object') {
-        throw new AppError(`Malformed response from Wikipedia for page: ${title}`, 502);
+        throw new AppError(`Malformed response from Wikipedia for page: ${title}`, 502, 'WIKI_API_ERROR');
       }
 
       if (data.error) {
@@ -243,12 +243,12 @@ export class WikiService {
           }
         } catch {}
 
-        throw new AppError(`Pagina Wikipedia non trovata per: "${title}"`, 404);
+        throw new AppError(`Pagina Wikipedia non trovata per: "${title}"`, 404, 'WIKI_PAGE_NOT_FOUND');
       }
 
       const parseData = data.parse;
       if (!parseData || typeof parseData !== 'object') {
-        throw new AppError(`Failed to parse Wikipedia article: ${title}`, 502);
+        throw new AppError(`Failed to parse Wikipedia article: ${title}`, 502, 'WIKI_API_ERROR');
       }
 
       const articleTitle = String(parseData.title || title);
@@ -274,7 +274,7 @@ export class WikiService {
       return result;
     } catch (error) {
       if (error instanceof AppError) throw error;
-      throw new AppError(`Error fetching content for page: ${title}`, 502);
+      throw new AppError(`Error fetching content for page: ${title}`, 502, 'WIKI_API_ERROR');
     }
   }
 

@@ -67,7 +67,7 @@ export class GameService {
 
         if (existingGame) {
           if (!isGameExpired(existingGame.startTime)) {
-            throw new AppError('User already has an active game in progress', 400);
+            throw new AppError('User already has an active game in progress', 400, 'ACTIVE_GAME_EXISTS');
           }
           await tx.game.update({
             where: { id: existingGame.id },
@@ -144,13 +144,13 @@ export class GameService {
       include: { steps: { orderBy: { stepOrder: 'asc' } } },
     });
 
-    if (!game) throw new AppError('Active game not found or unauthorized', 404);
+    if (!game) throw new AppError('Active game not found or unauthorized', 404, 'GAME_NOT_FOUND');
 
     const currentContent = await wikiService.getWikiArticleContent(game.currentPageTitle);
     const isLinkValid = currentContent.validLinks.some(link => normalizeWikiTitle(link) === normalizedTarget);
 
     if (!isLinkValid) {
-      throw new AppError(`Invalid step: link "${targetTitle}" is not present in "${game.currentPageTitle}"`, 400);
+      throw new AppError(`Invalid step: link "${targetTitle}" is not present in "${game.currentPageTitle}"`, 400, 'INVALID_STEP');
     }
 
     const targetArticleContent = await wikiService.getWikiArticleContent(targetTitle);
@@ -177,7 +177,7 @@ export class GameService {
         });
 
         if (updateResult.count === 0) {
-          throw new AppError('Concurrent step conflict: game state has already advanced', 409);
+          throw new AppError('Concurrent step conflict: game state has already advanced', 409, 'CONCURRENT_CONFLICT');
         }
 
         const stepCount = await tx.gameStep.count({ where: { gameId } });
@@ -209,7 +209,7 @@ export class GameService {
       where: { id: gameId, userId, status: GameStatus.IN_PROGRESS },
     });
 
-    if (!game) throw new AppError('Active game not found or unauthorized', 404);
+    if (!game) throw new AppError('Active game not found or unauthorized', 404, 'GAME_NOT_FOUND');
 
     return prisma.game.update({
       where: { id: gameId },
