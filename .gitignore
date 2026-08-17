@@ -25,6 +25,12 @@ test-results/
 */test-results/
 coverage/
 
+# Local databases & Prisma generated client
+*.db
+*.db-journal
+backend/dev.db
+backend/generated/
+
 # IDE & Editor caches
 .vscode/
 .idea/
