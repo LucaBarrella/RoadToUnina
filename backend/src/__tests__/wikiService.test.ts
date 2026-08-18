@@ -57,7 +57,7 @@ describe('WikiService', () => {
 
   describe('getWikiArticleContent', () => {
     it('should fetch, sanitize HTML, and filter ns=0 valid links', async () => {
-      const rawHtml = '<div><p>Welcome to Napoli <script>alert("xss")</script><a href="/wiki/Vesuvio">Vesuvio</a></p></div>';
+      const rawHtml = '<div><p>Welcome to Napoli <script>alert("xss")</script><a href="/wiki/Vesuvio">Vesuvio</a> e <a href="/wiki/Campania">Campania</a></p></div>';
       mockedAxios.get.mockResolvedValueOnce({
         data: {
           parse: {

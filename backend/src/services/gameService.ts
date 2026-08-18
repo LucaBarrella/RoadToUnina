@@ -31,12 +31,12 @@ export function normalizeWikiTitle(title: string): string {
 }
 
 /**
- * Checks if a game session has expired (>24 hours).
- * @param startTime Game creation date.
+ * Checks if a game session has expired (>24 hours of inactivity).
+ * @param lastActivity Date of last activity (updatedAt).
  * @returns True if expired.
  */
-export function isGameExpired(startTime: Date): boolean {
-  return (Date.now() - new Date(startTime).getTime()) / (1000 * 60 * 60) > EXPIRATION_HOURS;
+export function isGameExpired(lastActivity: Date): boolean {
+  return (Date.now() - new Date(lastActivity).getTime()) / (1000 * 60 * 60) > EXPIRATION_HOURS;
 }
 
 /** Service managing game session lifecycle, anti-cheat validation, and step progression. */
@@ -49,12 +49,19 @@ export class GameService {
    * @throws AppError 400 if user has an active non-expired game.
    */
   public async startGame(userId: string, overrideStartPage?: string): Promise<ActiveGameResponse> {
-    const rawStartTitle = overrideStartPage?.trim() || await wikiService.getRandomWikiArticle();
+    let rawStartTitle = overrideStartPage?.trim() || await wikiService.getRandomWikiArticle();
+    
+    // Edge case guard: Ensure start article is not identical to target goal
+    if (normalizeWikiTitle(rawStartTitle) === normalizeWikiTitle(TARGET_PAGE_TITLE)) {
+      rawStartTitle = await wikiService.getRandomWikiArticle();
+    }
+
     const currentArticle = await wikiService.getWikiArticleContent(rawStartTitle);
     const startTitle = currentArticle.title || rawStartTitle;
 
     const createdGame = await prisma.$transaction(
       async (tx) => {
+        // Acquire row lock on user record to serialize concurrent startGame requests in READ COMMITTED
         if (tx.user?.update) {
           try {
             await tx.user.update({ where: { id: userId }, data: { updatedAt: new Date() } });
@@ -66,7 +73,7 @@ export class GameService {
         });
 
         if (existingGame) {
-          if (!isGameExpired(existingGame.startTime)) {
+          if (!isGameExpired(existingGame.updatedAt || existingGame.startTime)) {
             throw new AppError('User already has an active game in progress', 400, 'ACTIVE_GAME_EXISTS');
           }
           await tx.game.update({
@@ -114,7 +121,7 @@ export class GameService {
 
     if (!game) return null;
 
-    if (isGameExpired(game.startTime)) {
+    if (isGameExpired(game.updatedAt || game.startTime)) {
       await prisma.game.update({ where: { id: game.id }, data: { status: GameStatus.ABANDONED } });
       return null;
     }

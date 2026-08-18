@@ -4,6 +4,7 @@ import { gameService, ActiveGameResponse } from '../services/gameService';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { validateMiddleware } from '../middlewares/validateMiddleware';
 import { AppError } from '../middlewares/errorMiddleware';
+import { IS_PRODUCTION } from '../config/env';
 
 /** Zod schema for game start payload. */
 export const startGameSchema = z.object({
@@ -36,13 +37,16 @@ router.post('/start', validateMiddleware(startGameSchema, 'body'), async (req, r
   try {
     const userId = req.user?.id;
     if (!userId) throw new AppError('Unauthorized: User session missing', 401);
-    const { overrideStartPage } = (req.body || {}) as { overrideStartPage?: string };
+    const rawOverride = (req.body || {}) as { overrideStartPage?: string };
+    // In production, overrideStartPage is strictly ignored to enforce random start and prevent leaderboard exploitation
+    const overrideStartPage = !IS_PRODUCTION ? rawOverride.overrideStartPage : undefined;
     const activeGame: ActiveGameResponse = await gameService.startGame(userId, overrideStartPage);
     res.status(201).json(activeGame);
   } catch (error) {
     next(error);
   }
 });
+
 
 /**
  * @route GET /api/games/active

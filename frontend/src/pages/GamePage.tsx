@@ -222,22 +222,24 @@ export const GamePage: React.FC = () => {
           )}
 
           <form onSubmit={handleStart} className="space-y-6">
-            <div>
-              <label
-                htmlFor="override-start-page"
-                className="block font-mono text-xs font-bold uppercase mb-2 text-neo-black"
-              >
-                Articolo di Partenza Personalizzato (Opzionale)
-              </label>
-              <input
-                id="override-start-page"
-                type="text"
-                value={overrideStartPage}
-                onChange={(e) => setOverrideStartPage(e.target.value)}
-                placeholder="Lascia vuoto per articolo casuale (es. Fisica quantistica)"
-                className="w-full p-3 border-3 border-neo-black font-inter text-neo-black bg-neo-surface focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-neo-black focus-visible:ring-offset-2 shadow-neo-sm"
-              />
-            </div>
+            {import.meta.env.DEV && (
+              <div className="p-3 bg-neo-yellow/20 border-2 border-dashed border-neo-black">
+                <label
+                  htmlFor="override-start-page"
+                  className="block font-mono text-xs font-bold uppercase mb-2 text-neo-black"
+                >
+                  🛠️ Articolo di Partenza Personalizzato (Solo DEV / Test)
+                </label>
+                <input
+                  id="override-start-page"
+                  type="text"
+                  value={overrideStartPage}
+                  onChange={(e) => setOverrideStartPage(e.target.value)}
+                  placeholder="Es. Napoli (solo per collaudo locale)"
+                  className="w-full p-2.5 border-2 border-neo-black font-inter text-neo-black bg-neo-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-black shadow-neo-sm text-sm"
+                />
+              </div>
+            )}
 
             <Button
               type="submit"

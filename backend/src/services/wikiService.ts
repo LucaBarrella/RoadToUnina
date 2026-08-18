@@ -126,7 +126,7 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
     'abbr', 'bdi', 'sup', 'sub', 'figure', 'figcaption',
   ]),
   allowedAttributes: {
-    '*': ['class', 'id', 'style', 'title', 'lang', 'dir', 'data-title'],
+    '*': ['class', 'id', 'title', 'lang', 'dir', 'data-title'],
     'a': ['href', 'title', 'target', 'data-title', 'class'],
     'img': ['src', 'alt', 'width', 'height', 'srcset', 'loading', 'decoding'],
   },
@@ -171,9 +171,24 @@ export function normalizeWikiCacheKey(title: string): string {
   return title.replace(/_/g, ' ').trim().toLowerCase();
 }
 
-/** In-memory LRU cache for Wikipedia article content. */
+/** Extracts target link titles from sanitized HTML. */
+export function extractValidLinksFromHtml(html: string): string[] {
+  if (!html) return [];
+  const linkSet = new Set<string>();
+  const regex = /data-title=["']([^"']+)["']/gi;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(html)) !== null) {
+    const target = (match[1] || '').trim();
+    if (target) linkSet.add(target);
+  }
+  return Array.from(linkSet);
+}
+
+/** In-memory bounded LRU cache for Wikipedia article content (max 200 items, ~50MB budget). */
 export const wikiArticleCache = new LRUCache<string, WikiArticleContent>({
-  max: 500,
+  max: 200,
+  maxSize: 50 * 1024 * 1024,
+  sizeCalculation: (entry) => (entry.htmlContent ? entry.htmlContent.length * 2 : 1024) + 1024,
   ttl: 1000 * 60 * 60,
 });
 
@@ -206,10 +221,11 @@ export class WikiService {
   /**
    * Retrieves parsed, sanitized HTML content and valid internal links for an article.
    * @param title Title of the Wikipedia article.
+   * @param depth Recursion depth for search fallback (max 1).
    * @returns Article title, sanitized HTML, and array of valid link titles.
    * @throws AppError 400 if title empty, 404 if article not found, 502 on API failure.
    */
-  public async getWikiArticleContent(title: string): Promise<WikiArticleContent> {
+  public async getWikiArticleContent(title: string, depth = 0): Promise<WikiArticleContent> {
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
       throw new AppError('Invalid or empty Wikipedia article title requested', 400, 'INVALID_WIKI_TITLE');
     }
@@ -231,17 +247,19 @@ export class WikiService {
       }
 
       if (data.error) {
-        try {
-          const searchResponse = await axios.get(WIKIPEDIA_API_URL, {
-            params: { action: 'query', list: 'search', srsearch: title, srnamespace: 0, srlimit: 1, format: 'json' },
-            headers: { 'User-Agent': USER_AGENT_HEADER },
-            timeout: HTTP_TIMEOUT_MS,
-          });
-          const searchResults = searchResponse.data?.query?.search;
-          if (Array.isArray(searchResults) && searchResults.length > 0 && searchResults[0]?.title) {
-            return await this.getWikiArticleContent(searchResults[0].title);
-          }
-        } catch {}
+        if (depth === 0) {
+          try {
+            const searchResponse = await axios.get(WIKIPEDIA_API_URL, {
+              params: { action: 'query', list: 'search', srsearch: title, srnamespace: 0, srlimit: 1, format: 'json' },
+              headers: { 'User-Agent': USER_AGENT_HEADER },
+              timeout: HTTP_TIMEOUT_MS,
+            });
+            const searchResults = searchResponse.data?.query?.search;
+            if (Array.isArray(searchResults) && searchResults.length > 0 && searchResults[0]?.title) {
+              return await this.getWikiArticleContent(searchResults[0].title, depth + 1);
+            }
+          } catch {}
+        }
 
         throw new AppError(`Pagina Wikipedia non trovata per: "${title}"`, 404, 'WIKI_PAGE_NOT_FOUND');
       }
@@ -255,16 +273,8 @@ export class WikiService {
       const rawHtmlContent = typeof parseData.text?.['*'] === 'string' ? parseData.text['*'] : '';
       const cleanHtmlContent = sanitizeHtml(rawHtmlContent, SANITIZE_OPTIONS);
 
-      const rawLinks = Array.isArray(parseData.links) ? parseData.links : [];
-      const validLinks = rawLinks
-        .filter((link): link is WikiParseLink & { '*': string } => {
-          if (!link || link.ns !== 0 || typeof link['*'] !== 'string') return false;
-          const trimmed = link['*'].trim();
-          if (!trimmed) return false;
-          const lower = trimmed.toLowerCase();
-          return !NON_ENC_NAMESPACES.some(ns => lower.startsWith(ns));
-        })
-        .map(link => link['*'].trim());
+      // Extract validLinks directly from the sanitized HTML visible to the player
+      const validLinks = extractValidLinksFromHtml(cleanHtmlContent);
 
       const result: WikiArticleContent = { title: articleTitle, htmlContent: cleanHtmlContent, validLinks };
 

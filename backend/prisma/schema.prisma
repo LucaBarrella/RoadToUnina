@@ -52,6 +52,8 @@ model GameStep {
   stepOrder Int
   createdAt DateTime @default(now())
 
+  @@unique([gameId, stepOrder])
   @@index([gameId, stepOrder])
 }
+
 
