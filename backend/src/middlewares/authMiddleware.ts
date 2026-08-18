@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from './errorMiddleware';
+import { JWT_SECRET } from '../config/env';
 
 /**
  * Payload decoded from a verified JSON Web Token.
@@ -47,13 +48,12 @@ export const authMiddleware = (
     return next(new AppError('Unauthorized: Token missing or invalid format', 401));
   }
 
-  const secret = process.env.JWT_SECRET || 'default_secret';
-
   try {
-    const decoded = jwt.verify(token, secret) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
     req.user = decoded;
     next();
   } catch {
     return next(new AppError('Unauthorized: Invalid or expired token', 401));
   }
 };
+

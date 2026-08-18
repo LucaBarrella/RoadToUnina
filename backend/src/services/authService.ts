@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db';
 import { AppError } from '../middlewares/errorMiddleware';
+import { JWT_SECRET } from '../config/env';
 
 /** User profile representation excluding sensitive password hash. */
 export type UserProfile = Omit<User, 'password'>;
@@ -117,11 +118,11 @@ export class AuthService {
 
   /** Generates signed JWT access token. */
   private generateToken(id: string, username: string): string {
-    const secret = process.env.JWT_SECRET || 'default_secret';
-    return jwt.sign({ id, username }, secret, { expiresIn: '7d' });
+    return jwt.sign({ id, username }, JWT_SECRET, { expiresIn: '7d' });
   }
 }
 
 export const authService = new AuthService();
+
 
 

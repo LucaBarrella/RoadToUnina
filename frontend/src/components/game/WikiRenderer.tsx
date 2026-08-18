@@ -1,4 +1,5 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 
 /** Props for the WikiRenderer component. */
 export interface WikiRendererProps {
@@ -29,12 +30,14 @@ export const STRIP_SELECTORS = [
   '.noprint', '.hatnote', '.shortcut', 'a.external',
 ];
 
-/** Non-encyclopedic namespaces to reject. */
+/** Non-encyclopedic Wikipedia namespaces to reject as game links. */
 export const NON_ENC_NAMESPACES = [
   'wikipedia:', 'wp:', 'aiuto:', 'speciale:', 'special:', 'categoria:', 'category:',
-  'portale:', 'portal:', 'discussione:', 'discussioni:', 'talk:', 'user:', 'utente:',
-  'file:', 'immagine:', 'template:', 'template_talk:', 'modulo:', 'progetto:',
-  'project:', 'mediawiki:', 'bozza:', 'guida:', 'media:',
+  'portale:', 'portal:', 'discussione:', 'discussioni:', 'discussioni_utente:',
+  'discussioni_progetto:', 'discussioni_wikipedia:', 'discussioni_portale:',
+  'discussioni_template:', 'discussioni_categoria:', 'discussione_aiuto:',
+  'talk:', 'user:', 'utente:', 'file:', 'immagine:', 'template:', 'template_talk:',
+  'modulo:', 'module:', 'progetto:', 'project:', 'mediawiki:', 'bozza:', 'guida:', 'media:',
 ];
 
 /**
@@ -105,18 +108,32 @@ export function isInternalNamespaceZeroLink(
   return { isValid: true, targetTitle: decodedTitle };
 }
 
-/** Sanitizes raw HTML if not pre-processed by backend. */
-export function cleanAndSanitizeWikiHtml(rawHtml: string): string {
+/** Normalizes Wikipedia links and applies DOMPurify client-side sanitization. */
+export function normalizeWikiLinks(rawHtml: string): string {
   if (!rawHtml || typeof rawHtml !== 'string') return '';
-  if (rawHtml.includes('class="wiki-chip"') || rawHtml.includes("class='wiki-chip'")) {
-    return rawHtml;
-  }
-  if (typeof window === 'undefined' || typeof DOMParser === 'undefined') return rawHtml;
+
+  // Defense-in-depth: run DOMPurify to strip XSS, event handlers, and javascript URIs
+  const purified = DOMPurify.sanitize(rawHtml, {
+    ALLOWED_TAGS: [
+      'p', 'span', 'div', 'a', 'b', 'strong', 'i', 'em', 'u', 's', 'small',
+      'table', 'tbody', 'thead', 'tr', 'th', 'td', 'caption', 'ul', 'ol', 'li',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'hr', 'br',
+      'img', 'abbr', 'bdi', 'sup', 'sub', 'figure', 'figcaption',
+    ],
+    ALLOWED_ATTR: ['class', 'id', 'title', 'lang', 'dir', 'data-title', 'href', 'src', 'alt', 'width', 'height', 'loading', 'decoding'],
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+  });
+
+  if (typeof window === 'undefined' || typeof DOMParser === 'undefined') return purified;
 
   try {
-    const doc = new DOMParser().parseFromString(rawHtml, 'text/html');
+    const doc = new DOMParser().parseFromString(purified, 'text/html');
     STRIP_SELECTORS.forEach(selector => doc.querySelectorAll(selector).forEach(el => el.remove()));
     doc.querySelectorAll('a').forEach((anchor) => {
+      const dataTitle = anchor.getAttribute('data-title');
+      if (dataTitle && anchor.classList.contains('wiki-chip')) {
+        return;
+      }
       const href = anchor.getAttribute('href') || '';
       const className = anchor.getAttribute('class') || '';
       const { isValid, targetTitle } = isInternalNamespaceZeroLink(href, className);
@@ -134,7 +151,7 @@ export function cleanAndSanitizeWikiHtml(rawHtml: string): string {
     });
     return doc.body.innerHTML;
   } catch {
-    return rawHtml;
+    return purified;
   }
 }
 
@@ -204,7 +221,7 @@ export const WikiRenderer: React.FC<WikiRendererProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [openSections, setOpenSections] = useState<Record<number, boolean>>({ 0: true });
 
-  const sanitizedHtml = useMemo(() => cleanAndSanitizeWikiHtml(htmlContent), [htmlContent]);
+  const sanitizedHtml = useMemo(() => normalizeWikiLinks(htmlContent), [htmlContent]);
   const sections = useMemo(() => parseWikiSections(sanitizedHtml), [sanitizedHtml]);
   const allAvailableLinks = useMemo(() => extractQuickLinks(sanitizedHtml), [sanitizedHtml]);
 
@@ -214,6 +231,7 @@ export const WikiRenderer: React.FC<WikiRendererProps> = ({
     sections.forEach(s => { allOpen[s.id] = true; });
     setOpenSections(allOpen);
   }, [title, sections]);
+
 
   const filteredQuickLinks = useMemo(() => {
     if (!searchQuery.trim()) return [];
