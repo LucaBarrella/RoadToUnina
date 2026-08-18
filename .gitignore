@@ -35,3 +35,6 @@ backend/generated/
 .vscode/
 .idea/
 *.tsbuildinfo
+message (1).txt
+.agents/
+

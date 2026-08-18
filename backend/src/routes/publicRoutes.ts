@@ -11,7 +11,10 @@ const router: Router = Router();
 router.get('/completed-games', async (req, res, next) => {
   try {
     const rawLimit = req.query.limit;
-    const limit: number = typeof rawLimit === 'string' ? Math.max(1, parseInt(rawLimit, 10) || 20) : 20;
+    const limit: number =
+      typeof rawLimit === 'string'
+        ? Math.min(100, Math.max(1, parseInt(rawLimit, 10) || 20))
+        : 20;
     const games: CompletedGameView[] = await publicService.getCompletedGames(limit);
     res.status(200).json(games);
   } catch (error) {
@@ -27,7 +30,10 @@ router.get('/completed-games', async (req, res, next) => {
 router.get('/leaderboard', async (req, res, next) => {
   try {
     const rawLimit = req.query.limit;
-    const limit: number = typeof rawLimit === 'string' ? Math.max(1, parseInt(rawLimit, 10) || 50) : 50;
+    const limit: number =
+      typeof rawLimit === 'string'
+        ? Math.min(100, Math.max(1, parseInt(rawLimit, 10) || 50))
+        : 50;
     const leaderboard: LeaderboardEntry[] = await publicService.getLeaderboard(limit);
     res.status(200).json(leaderboard);
   } catch (error) {
