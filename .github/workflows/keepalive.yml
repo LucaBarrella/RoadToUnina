@@ -1,0 +1,27 @@
+name: Keep-Alive Supabase & Render
+
+on:
+  schedule:
+    # Runs every 2 days at 08:00 UTC (keeps Supabase from pausing after 7 days)
+    - cron: '0 8 */2 * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  keepalive:
+    name: 💓 Ping Backend & Database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🌐 Ping Render & Supabase
+        run: |
+          echo "Sending keep-alive ping to Render backend..."
+          RESPONSE_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 120 "https://roadtounina-backend.onrender.com/api/public/leaderboard")
+          echo "HTTP Response Status Code: $RESPONSE_CODE"
+          if [ "$RESPONSE_CODE" -eq 200 ]; then
+            echo "✅ Keep-alive successful! Render and Supabase DB touched."
+          else
+            echo "⚠️ Warning: Received HTTP $RESPONSE_CODE, retrying once..."
+            sleep 10
+            curl -s -f --max-time 120 "https://roadtounina-backend.onrender.com/api/public/leaderboard" > /dev/null
+            echo "✅ Second attempt succeeded!"
+          fi
