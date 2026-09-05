@@ -31,6 +31,8 @@ export interface HttpErrorLike {
   status?: number;
 }
 
+import { ErrorCode } from '../constants/errorCodes';
+
 /**
  * Custom application error class representing operational HTTP errors.
  * Extends the native JavaScript Error with an explicit HTTP status code.
@@ -42,21 +44,21 @@ export class AppError extends Error {
   public readonly statusCode: number;
 
   /**
-   * Machine-readable error code (e.g. 'ACTIVE_GAME_EXISTS', 'INVALID_STEP', 'NOT_FOUND').
+   * Machine-readable error code (e.g. ErrorCode.ACTIVE_GAME_EXISTS, ErrorCode.INVALID_STEP).
    */
-  public readonly code?: string;
+  public readonly code?: ErrorCode | string;
 
   /**
    * Constructs a new AppError instance.
    *
    * @param {string} message - Descriptive error message explaining the failure cause.
    * @param {number} [statusCode=500] - HTTP status code. Defaults to 500.
-   * @param {string} [code] - Machine-readable error code.
+   * @param {ErrorCode | string} [code] - Machine-readable error code.
    *
    * @example
-   * throw new AppError('Resource not found', 404, 'NOT_FOUND');
+   * throw new AppError('Resource not found', 404, ErrorCode.NOT_FOUND);
    */
-  constructor(message: string, statusCode: number = 500, code?: string) {
+  constructor(message: string, statusCode: number = 500, code?: ErrorCode | string) {
     super(message);
     this.statusCode = statusCode;
     this.code = code;
@@ -125,7 +127,7 @@ export const errorMiddleware = (
 
     res.status(400).json({
       error: 'Validation Error',
-      code: 'VALIDATION_ERROR',
+      code: ErrorCode.VALIDATION_ERROR,
       details,
     });
     return;
@@ -134,7 +136,7 @@ export const errorMiddleware = (
   if (isPayloadTooLargeError(err)) {
     res.status(413).json({
       error: 'Payload Too Large: Request body exceeds size limits',
-      code: 'PAYLOAD_TOO_LARGE',
+      code: ErrorCode.PAYLOAD_TOO_LARGE,
     });
     return;
   }
@@ -142,7 +144,7 @@ export const errorMiddleware = (
   if (isMalformedJsonError(err)) {
     res.status(400).json({
       error: 'Malformed JSON payload',
-      code: 'MALFORMED_JSON',
+      code: ErrorCode.MALFORMED_JSON,
     });
     return;
   }
@@ -151,6 +153,6 @@ export const errorMiddleware = (
 
   res.status(500).json({
     error: 'Internal Server Error',
-    code: 'INTERNAL_SERVER_ERROR',
+    code: ErrorCode.INTERNAL_SERVER_ERROR,
   });
 };

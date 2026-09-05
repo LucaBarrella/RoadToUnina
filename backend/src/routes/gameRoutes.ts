@@ -4,6 +4,7 @@ import { gameService, ActiveGameResponse } from '../services/gameService';
 import { authMiddleware } from '../middlewares/authMiddleware';
 import { validateMiddleware } from '../middlewares/validateMiddleware';
 import { AppError } from '../middlewares/errorMiddleware';
+import { ErrorCode } from '../constants/errorCodes';
 import { IS_PRODUCTION } from '../config/env';
 
 /** Zod schema for game start payload. */
@@ -36,7 +37,7 @@ router.use(authMiddleware);
 router.post('/start', validateMiddleware(startGameSchema, 'body'), async (req, res, next) => {
   try {
     const userId = req.user?.id;
-    if (!userId) throw new AppError('Unauthorized: User session missing', 401);
+    if (!userId) throw new AppError('Unauthorized: User session missing', 401, ErrorCode.UNAUTHORIZED);
     const rawOverride = (req.body || {}) as { overrideStartPage?: string };
     // In production, overrideStartPage is strictly ignored to enforce random start and prevent leaderboard exploitation
     const overrideStartPage = !IS_PRODUCTION ? rawOverride.overrideStartPage : undefined;
@@ -56,7 +57,7 @@ router.post('/start', validateMiddleware(startGameSchema, 'body'), async (req, r
 router.get('/active', async (req, res, next) => {
   try {
     const userId = req.user?.id;
-    if (!userId) throw new AppError('Unauthorized: User session missing', 401);
+    if (!userId) throw new AppError('Unauthorized: User session missing', 401, ErrorCode.UNAUTHORIZED);
     const activeGame = await gameService.getActiveGame(userId);
     res.status(200).json(activeGame);
   } catch (error) {
@@ -76,7 +77,7 @@ router.post(
   async (req, res, next) => {
     try {
       const userId = req.user?.id;
-      if (!userId) throw new AppError('Unauthorized: User session missing', 401);
+      if (!userId) throw new AppError('Unauthorized: User session missing', 401, ErrorCode.UNAUTHORIZED);
       const gameId = String(req.params.id);
       const { targetTitle } = req.body as { targetTitle: string };
       const activeGame = await gameService.makeStep(userId, gameId, targetTitle);
@@ -98,7 +99,7 @@ router.post(
   async (req, res, next) => {
     try {
       const userId = req.user?.id;
-      if (!userId) throw new AppError('Unauthorized: User session missing', 401);
+      if (!userId) throw new AppError('Unauthorized: User session missing', 401, ErrorCode.UNAUTHORIZED);
       const gameId = String(req.params.id);
       const game = await gameService.abandonGame(userId, gameId);
       res.status(200).json(game);

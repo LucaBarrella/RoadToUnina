@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { AppError } from './errorMiddleware';
+import { ErrorCode } from '../constants/errorCodes';
 import { JWT_SECRET } from '../config/env';
 
 /**
@@ -40,12 +41,12 @@ export const authMiddleware = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return next(new AppError('Unauthorized: Token missing or invalid format', 401));
+    return next(new AppError('Unauthorized: Token missing or invalid format', 401, ErrorCode.UNAUTHORIZED));
   }
 
   const token = authHeader.substring(7).trim();
   if (!token) {
-    return next(new AppError('Unauthorized: Token missing or invalid format', 401));
+    return next(new AppError('Unauthorized: Token missing or invalid format', 401, ErrorCode.UNAUTHORIZED));
   }
 
   try {
@@ -53,7 +54,7 @@ export const authMiddleware = (
     req.user = decoded;
     next();
   } catch {
-    return next(new AppError('Unauthorized: Invalid or expired token', 401));
+    return next(new AppError('Unauthorized: Invalid or expired token', 401, ErrorCode.UNAUTHORIZED));
   }
 };
 

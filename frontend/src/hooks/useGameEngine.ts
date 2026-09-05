@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Game, WikiArticleContent } from '../types';
 import { gameApi } from '../api';
+import { ErrorCode } from '../constants/errorCodes';
 
 /** Interface for useGameEngine hook return payload. */
 export interface UseGameEngineReturn {
@@ -149,7 +150,7 @@ export function useGameEngine(): UseGameEngineReturn {
       setCurrentArticle(activeData.currentArticle);
       return activeData.game;
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && (err.response?.status === 400 || (err.response?.data as { code?: string })?.code === 'ACTIVE_GAME_EXISTS')) {
+      if (axios.isAxiosError(err) && (err.response?.status === 400 || (err.response?.data as { code?: string })?.code === ErrorCode.ACTIVE_GAME_EXISTS)) {
         try {
           const activeData = await gameApi.getActiveGame();
           if (activeData?.game) {

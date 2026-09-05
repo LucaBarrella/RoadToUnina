@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/db';
 import { AppError } from '../middlewares/errorMiddleware';
+import { ErrorCode } from '../constants/errorCodes';
 import { JWT_SECRET } from '../config/env';
 
 /** User profile representation excluding sensitive password hash. */
@@ -57,9 +58,9 @@ export class AuthService {
 
     if (existingUser) {
       if (existingUser.email.toLowerCase() === normalizedEmail) {
-        throw new AppError('Email is already registered', 400, 'EMAIL_ALREADY_REGISTERED');
+        throw new AppError('Email is already registered', 400, ErrorCode.EMAIL_ALREADY_REGISTERED);
       }
-      throw new AppError('Username is already taken', 400, 'USERNAME_ALREADY_TAKEN');
+      throw new AppError('Username is already taken', 400, ErrorCode.USERNAME_ALREADY_TAKEN);
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -95,7 +96,7 @@ export class AuthService {
     });
 
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
-      throw new AppError('Invalid credentials', 401, 'INVALID_CREDENTIALS');
+      throw new AppError('Invalid credentials', 401, ErrorCode.INVALID_CREDENTIALS);
     }
 
     return {
@@ -112,7 +113,7 @@ export class AuthService {
    */
   public async getProfile(userId: string): Promise<UserProfile> {
     const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new AppError('User not found', 404, 'USER_NOT_FOUND');
+    if (!user) throw new AppError('User not found', 404, ErrorCode.USER_NOT_FOUND);
     return sanitizeUser(user);
   }
 

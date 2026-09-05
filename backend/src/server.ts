@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes';
 import gameRoutes from './routes/gameRoutes';
 import publicRoutes from './routes/publicRoutes';
 import { errorMiddleware, AppError } from './middlewares/errorMiddleware';
+import { ErrorCode } from './constants/errorCodes';
 import { prisma } from './config/db';
 import { IS_PRODUCTION, IS_TEST, PORT, ALLOWED_ORIGINS } from './config/env';
 
@@ -60,7 +61,7 @@ const corsOptions = {
       }
     }
 
-    callback(new AppError(`CORS Policy: Origin ${origin} is not permitted`, 403, 'CORS_NOT_ALLOWED'));
+    callback(new AppError(`CORS Policy: Origin ${origin} is not permitted`, 403, ErrorCode.CORS_NOT_ALLOWED));
   },
   credentials: true,
 };
@@ -90,7 +91,7 @@ export const createApp = (): Express => {
   app.use((_req, res) => {
     res.status(404).json({
       error: 'Endpoint not found',
-      code: 'NOT_FOUND',
+      code: ErrorCode.NOT_FOUND,
     });
   });
 

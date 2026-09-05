@@ -2,6 +2,7 @@ import { Game, GameStep, GameStatus } from '@prisma/client';
 import { prisma } from '../config/db';
 import { wikiService, WikiArticleContent } from './wikiService';
 import { AppError } from '../middlewares/errorMiddleware';
+import { ErrorCode } from '../constants/errorCodes';
 
 /** Composite Game entity type with ordered steps. */
 export type GameWithSteps = Game & { steps: GameStep[] };
@@ -74,7 +75,7 @@ export class GameService {
 
         if (existingGame) {
           if (!isGameExpired(existingGame.updatedAt || existingGame.startTime)) {
-            throw new AppError('User already has an active game in progress', 400, 'ACTIVE_GAME_EXISTS');
+            throw new AppError('User already has an active game in progress', 400, ErrorCode.ACTIVE_GAME_EXISTS);
           }
           await tx.game.update({
             where: { id: existingGame.id },
@@ -151,13 +152,13 @@ export class GameService {
       include: { steps: { orderBy: { stepOrder: 'asc' } } },
     });
 
-    if (!game) throw new AppError('Active game not found or unauthorized', 404, 'GAME_NOT_FOUND');
+    if (!game) throw new AppError('Active game not found or unauthorized', 404, ErrorCode.GAME_NOT_FOUND);
 
     const currentContent = await wikiService.getWikiArticleContent(game.currentPageTitle);
     const isLinkValid = currentContent.validLinks.some(link => normalizeWikiTitle(link) === normalizedTarget);
 
     if (!isLinkValid) {
-      throw new AppError(`Invalid step: link "${targetTitle}" is not present in "${game.currentPageTitle}"`, 400, 'INVALID_STEP');
+      throw new AppError(`Invalid step: link "${targetTitle}" is not present in "${game.currentPageTitle}"`, 400, ErrorCode.INVALID_STEP);
     }
 
     const targetArticleContent = await wikiService.getWikiArticleContent(targetTitle);
@@ -184,7 +185,7 @@ export class GameService {
         });
 
         if (updateResult.count === 0) {
-          throw new AppError('Concurrent step conflict: game state has already advanced', 409, 'CONCURRENT_CONFLICT');
+          throw new AppError('Concurrent step conflict: game state has already advanced', 409, ErrorCode.CONCURRENT_CONFLICT);
         }
 
         const stepCount = await tx.gameStep.count({ where: { gameId } });
@@ -216,7 +217,7 @@ export class GameService {
       where: { id: gameId, userId, status: GameStatus.IN_PROGRESS },
     });
 
-    if (!game) throw new AppError('Active game not found or unauthorized', 404, 'GAME_NOT_FOUND');
+    if (!game) throw new AppError('Active game not found or unauthorized', 404, ErrorCode.GAME_NOT_FOUND);
 
     return prisma.game.update({
       where: { id: gameId },
