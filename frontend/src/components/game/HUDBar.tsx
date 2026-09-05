@@ -113,10 +113,10 @@ export const HUDBar: React.FC<HUDBarProps> = ({
           <Button
             variant="danger"
             size="sm"
-            icon="warning"
+            icon="flag"
             onClick={onAbandon}
             aria-label="Abbandona la partita attuale"
-            title="Abbandona la partita attuale"
+            title="Abbandona la partita attuale (resa)"
             className="min-h-[44px]"
           >
             <span className="hidden xs:inline">Abbandona</span>
