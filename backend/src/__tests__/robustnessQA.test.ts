@@ -523,7 +523,8 @@ describe('Principal QA Robustness Suite — RoadToUnina Backend', () => {
       expect(finalGame.steps[0]?.stepOrder).toBe(1);
       expect(finalGame.steps[0]?.pageTitle).toBe('Napoli');
       expect(finalGame.steps[1]?.stepOrder).toBe(2);
-      expect(finalGame.steps[1]?.pageTitle.toLowerCase()).toBe(validLink.toLowerCase());
+      const resolvedTarget = await wikiService.getWikiArticleContent(validLink);
+      expect(finalGame.steps[1]?.pageTitle.toLowerCase()).toBe(resolvedTarget.title.toLowerCase());
     });
 
     it('should atomically handle race conditions between concurrent step and abandon requests', async () => {
