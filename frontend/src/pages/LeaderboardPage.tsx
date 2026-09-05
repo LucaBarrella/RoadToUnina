@@ -178,24 +178,52 @@ export const LeaderboardPage: React.FC = () => {
             )}
 
             {/* Recent Completed Games */}
-            <Card variant="white" title="Storico Recente" icon="history">
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-                {completedGames.slice(0, 5).map((g) => (
-                  <div
-                    key={g.id}
-                    className="p-3 bg-surface-container border-2 border-neo-black shadow-neo-sm font-inter text-xs text-neo-black"
-                  >
-                    <div className="flex justify-between font-bold mb-1">
-                      <span>{g.user?.username || 'Anonimo'}</span>
-                      <span className="font-mono font-bold bg-neo-pink text-neo-on-accent px-1.5 py-0.5 border border-neo-black">
-                        {formatSeconds(g.durationSeconds)}
-                      </span>
-                    </div>
-                    <div className="text-neo-black font-medium truncate" title={`${g.startPageTitle} ➔ Unina`}>
-                      {g.startPageTitle} ➔ Unina
-                    </div>
-                  </div>
-                ))}
+            <Card variant="white" title="Partite Concluse (Ospiti)" icon="history">
+              <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+                {completedGames.length === 0 ? (
+                  <p className="font-inter text-xs text-neo-black py-2">Nessuna partita completata registrata.</p>
+                ) : (
+                  completedGames.slice(0, 8).map((g) => (
+                    <details
+                      key={g.id}
+                      className="group p-3 bg-surface-container border-2 border-neo-black shadow-neo-sm font-inter text-xs text-neo-black cursor-pointer"
+                    >
+                      <summary className="flex justify-between items-center font-bold select-none list-none">
+                        <div className="flex flex-col">
+                          <span className="text-sm">{g.user?.username || 'Anonimo'}</span>
+                          <span className="font-normal text-[11px] text-gray-700">
+                            {g.clickCount} {g.clickCount === 1 ? 'click' : 'click'} • {formatSeconds(g.durationSeconds)}
+                          </span>
+                        </div>
+                        <span className="font-mono text-xs bg-neo-yellow text-neo-on-accent px-1.5 py-0.5 border border-neo-black group-open:rotate-180 transition-transform">
+                          ▼
+                        </span>
+                      </summary>
+
+                      <div className="mt-3 pt-2 border-t-2 border-dashed border-neo-black space-y-1.5">
+                        <p className="font-bold text-[11px] uppercase tracking-wider text-neo-black">
+                          Percorso Effettuato ({g.steps?.length || 0} tappe):
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1.5 font-mono text-[11px]">
+                          {g.steps && g.steps.length > 0 ? (
+                            g.steps.map((st, idx) => (
+                              <React.Fragment key={idx}>
+                                <span className="bg-neo-surface px-1.5 py-0.5 border border-neo-black font-semibold">
+                                  {st.pageTitle}
+                                </span>
+                                {idx < g.steps.length - 1 && (
+                                  <span className="font-bold text-gray-500">➔</span>
+                                )}
+                              </React.Fragment>
+                            ))
+                          ) : (
+                            <span>{g.startPageTitle} ➔ {g.targetPageTitle}</span>
+                          )}
+                        </div>
+                      </div>
+                    </details>
+                  ))
+                )}
               </div>
             </Card>
           </aside>
