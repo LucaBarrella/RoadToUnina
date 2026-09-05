@@ -98,7 +98,8 @@ export function isInternalNamespaceZeroLink(
   else if (pathname.startsWith('./')) rawTitle = pathname.slice(2);
   else return { isValid: false, targetTitle: null };
 
-  rawTitle = rawTitle.split('#')[0]!.split('?')[0]!;
+  const cleanHash = rawTitle.split('#')[0] || '';
+  rawTitle = cleanHash.split('?')[0] || '';
   if (!rawTitle.trim()) return { isValid: false, targetTitle: null };
 
   let decoded = '';
