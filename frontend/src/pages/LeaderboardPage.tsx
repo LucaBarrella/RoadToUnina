@@ -178,7 +178,7 @@ export const LeaderboardPage: React.FC = () => {
             )}
 
             {/* Recent Completed Games */}
-            <Card variant="white" title="Partite Concluse (Ospiti)" icon="history">
+            <Card variant="white" title="Storico Partite Concluse" icon="history">
               <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
                 {completedGames.length === 0 ? (
                   <p className="font-inter text-xs text-neo-black py-2">Nessuna partita completata registrata.</p>
@@ -189,8 +189,13 @@ export const LeaderboardPage: React.FC = () => {
                       className="group p-3 bg-surface-container border-2 border-neo-black shadow-neo-sm font-inter text-xs text-neo-black cursor-pointer"
                     >
                       <summary className="flex justify-between items-center font-bold select-none list-none">
-                        <div className="flex flex-col">
-                          <span className="text-sm">{g.user?.username || 'Anonimo'}</span>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-sm font-bold text-neo-black">{g.user?.username || 'Anonimo'}</span>
+                            <span className="font-mono text-[11px] font-bold text-neo-black bg-neo-yellow px-1.5 py-0.5 border border-neo-black shadow-neo-sm">
+                              {g.startPageTitle} ➔ Unina
+                            </span>
+                          </div>
                           <span className="font-normal text-[11px] text-gray-700">
                             {g.clickCount} {g.clickCount === 1 ? 'click' : 'click'} • {formatSeconds(g.durationSeconds)}
                           </span>
