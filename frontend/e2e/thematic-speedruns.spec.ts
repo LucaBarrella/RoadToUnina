@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 test.describe('RoadToUnina — Thematic Speedrun Playtests (Boris, antirez, Local LLMs, Napoli, Totò)', () => {
   const testId = Date.now().toString().slice(-5);
 
   // Helper to register and login a distinct user for each thematic test suite
-  async function setupUser(page: any, username: string) {
+  async function setupUser(page: Page, username: string) {
     const user = {
       username: `${username}_${testId}`,
       email: `${username}.${testId}@unina.it`,

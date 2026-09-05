@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 test.describe('RoadToUnina — UX, Session Persistence & Accessibility Playtest Suite', () => {
-  async function registerUser(page: any, prefix: string) {
+  async function registerUser(page: Page, prefix: string) {
     const rand = Math.floor(Math.random() * 900000) + 100000;
     const user = {
       username: `${prefix}_${rand}`,
