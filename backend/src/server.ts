@@ -163,10 +163,10 @@ export const startServer = (): Server => {
 };
 
 const isMainModule =
-  require.main === module ||
-  (Boolean(process.argv[1]) && /server\.(ts|js)$/.test(process.argv[1]));
+  Boolean(require.main === module) ||
+  (Boolean(process.argv[1]) && /(?:^|[/\\])server\.(ts|js)$/.test(process.argv[1]));
 
-if (isMainModule && !IS_TEST) {
+if (isMainModule && !process.env.VITEST) {
   startServer();
 }
 
