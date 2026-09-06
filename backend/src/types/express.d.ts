@@ -1,5 +1,3 @@
-import { UserProfile } from '../services/authService';
-
 /**
  * Global Declaration Merging for Express Request.
  * Extends Express's Request interface to include the authenticated `user` payload on `req.user`.

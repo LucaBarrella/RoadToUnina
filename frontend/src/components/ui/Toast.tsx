@@ -18,12 +18,19 @@ export interface ToastProps {
   variant?: 'pink' | 'yellow' | 'cyan';
 }
 
+const TOAST_BG_MAP: Record<'pink' | 'yellow' | 'cyan', string> = {
+  yellow: 'bg-neo-yellow text-neo-on-accent',
+  cyan: 'bg-neo-cyan text-neo-on-accent',
+  pink: 'bg-neo-pink text-neo-on-accent',
+};
+
 /**
  * Reusable Neobrutalist Toast notification component.
  * Displays discreet floating alerts in the bottom-right corner with auto-dismissal.
  * Complies with WCAG 2.1 AA/AAA accessibility standards with aria-live polite regions.
  *
  * @param props - Component props matching ToastProps.
+ * @returns React toast alert element or null when closed.
  * @example
  * ```tsx
  * <Toast
@@ -53,23 +60,13 @@ export const Toast: React.FC<ToastProps> = ({
 
   if (!isOpen || !message) return null;
 
-  const getBgClass = () => {
-    switch (variant) {
-      case 'yellow':
-        return 'bg-neo-yellow text-neo-on-accent';
-      case 'cyan':
-        return 'bg-neo-cyan text-neo-on-accent';
-      case 'pink':
-      default:
-        return 'bg-neo-pink text-neo-on-accent';
-    }
-  };
+  const bgClass = TOAST_BG_MAP[variant] ?? TOAST_BG_MAP.pink;
 
   return (
     <div
       role="status"
       aria-live="polite"
-      className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 max-w-sm sm:max-w-md ${getBgClass()} border-3 border-neo-black shadow-neo p-3.5 sm:p-4 font-space font-bold text-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-150 select-none`}
+      className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 max-w-sm sm:max-w-md ${bgClass} border-3 border-neo-black shadow-neo p-3.5 sm:p-4 font-space font-bold text-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-150 select-none`}
     >
       <span aria-hidden="true" className="material-symbols-outlined text-xl flex-shrink-0">
         {icon}

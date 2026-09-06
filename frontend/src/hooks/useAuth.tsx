@@ -52,7 +52,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       const profile = await authApi.getProfile();
       setUser(profile);
-    } catch {
+    } catch (_profileErr) {
+      // Stored token is expired, revoked, or server rejected auth; reset session
       localStorage.removeItem('token');
       setToken(null);
       setUser(null);

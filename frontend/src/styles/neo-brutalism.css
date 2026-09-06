@@ -20,6 +20,12 @@
   --color-neo-pink: #ff2e93;
   --color-neo-green: #10b981;
   --color-neo-on-accent: #1b1b1b;
+
+  /* Semantic Feedback Tokens */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-success-container: #d1fae5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,6 +51,12 @@
     --color-neo-pink: #ff2e93;
     --color-neo-green: #10b981;
     --color-neo-on-accent: #1b1b1b;
+
+    /* Semantic Feedback Tokens */
+    --color-error: #ffb4ab;
+    --color-on-error: #690005;
+    --color-error-container: #93000a;
+    --color-success-container: #064e3b;
   }
 }
 
@@ -71,6 +83,12 @@
   --color-neo-pink: #ff2e93;
   --color-neo-green: #10b981;
   --color-neo-on-accent: #1b1b1b;
+
+  /* Semantic Feedback Tokens */
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+  --color-error-container: #93000a;
+  --color-success-container: #064e3b;
 }
 
 @layer utilities {

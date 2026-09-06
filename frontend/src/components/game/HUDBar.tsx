@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '../ui/Button';
+import { formatSeconds } from '../../utils';
 
 /**
  * Props for the HUDBar component.
@@ -40,12 +41,6 @@ export const HUDBar: React.FC<HUDBarProps> = ({
   clickCount,
   onAbandon,
 }) => {
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
   return (
     <aside
       aria-label="Pannello di controllo della partita (HUD)"
@@ -83,14 +78,14 @@ export const HUDBar: React.FC<HUDBarProps> = ({
         {/* Timer */}
         <div
           role="status"
-          aria-label={`Tempo trascorso: ${formatTime(elapsedSeconds)}`}
+          aria-label={`Tempo trascorso: ${formatSeconds(elapsedSeconds)}`}
           className="bg-neo-pink text-neo-on-accent px-3 sm:px-4 py-2 border-3 border-neo-black shadow-neo-sm flex items-center gap-1.5 sm:gap-2 min-h-[44px]"
         >
           <span aria-hidden="true" className="material-symbols-outlined text-xl sm:text-2xl">
             timer
           </span>
           <span className="font-mono font-bold text-base sm:text-xl tracking-widest">
-            {formatTime(elapsedSeconds)}
+            {formatSeconds(elapsedSeconds)}
           </span>
         </div>
 

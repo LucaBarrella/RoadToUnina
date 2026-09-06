@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useGameEngine } from '../hooks';
+import { formatSeconds } from '../utils';
 import HUDBar from '../components/game/HUDBar';
 import WikiRenderer from '../components/game/WikiRenderer';
 import Button from '../components/ui/Button';
@@ -46,12 +47,6 @@ export const GamePage: React.FC = () => {
     } catch {
       // Error state is already set and managed inside useGameEngine
     }
-  };
-
-  const formatSeconds = (totalSecs: number) => {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   // Check for navigation loops in steps

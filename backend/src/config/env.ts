@@ -7,13 +7,23 @@ dotenv.config();
  * Validates and exports mandatory environment variables.
  * Fails fast during application boot if critical secrets are missing or insecure.
  */
-export const NODE_ENV = process.env.NODE_ENV || 'development';
-export const IS_PRODUCTION = NODE_ENV === 'production';
-export const IS_TEST = NODE_ENV === 'test';
+/** Current runtime execution environment (development, production, or test). */
+export const NODE_ENV: string = process.env.NODE_ENV || 'development';
 
-export const PORT = parseInt(process.env.PORT || '3001', 10);
+/** Flag indicating whether the application is running in production mode. */
+export const IS_PRODUCTION: boolean = NODE_ENV === 'production';
 
-export const JWT_SECRET = (() => {
+/** Flag indicating whether the application is running in automated test mode (Vitest). */
+export const IS_TEST: boolean = NODE_ENV === 'test';
+
+/** HTTP port number the backend Express server binds to. */
+export const PORT: number = parseInt(process.env.PORT || '3001', 10);
+
+/**
+ * Secret key used to sign and verify JSON Web Tokens (minimum 32 characters).
+ * @throws {Error} If missing or shorter than 32 characters in non-test mode.
+ */
+export const JWT_SECRET: string = (() => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     if (IS_TEST) {
@@ -30,10 +40,12 @@ export const JWT_SECRET = (() => {
   return secret;
 })();
 
-export const DATABASE_URL =
+/** PostgreSQL connection string URL for Prisma client. */
+export const DATABASE_URL: string =
   process.env.DATABASE_URL ||
   'postgresql://postgres:postgrespassword@localhost:5432/roadtounina?schema=public';
 
-export const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+/** Whitelist of permitted CORS client origins. */
+export const ALLOWED_ORIGINS: string[] = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://localhost:80'];

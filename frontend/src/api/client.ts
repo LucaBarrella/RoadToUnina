@@ -1,7 +1,9 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
 
 const API_BASE_URL: string =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) || 'http://localhost:3001/api';
+  typeof import.meta.env.VITE_API_BASE_URL === 'string'
+    ? import.meta.env.VITE_API_BASE_URL
+    : 'http://localhost:3001/api';
 
 /**
  * Centralized Axios instance for RoadToUnina API.

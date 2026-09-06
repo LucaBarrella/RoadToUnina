@@ -12,6 +12,10 @@ import { ErrorCode } from './constants/errorCodes';
 import { prisma } from './config/db';
 import { IS_PRODUCTION, IS_TEST, PORT, ALLOWED_ORIGINS } from './config/env';
 
+/**
+ * Rate limiting middleware for authentication endpoints (/api/auth).
+ * Restricts excessive login and registration requests to mitigate brute-force attacks.
+ */
 export const authLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: IS_PRODUCTION ? 50 : 1000,
@@ -21,6 +25,10 @@ export const authLimiter: RateLimitRequestHandler = rateLimit({
   message: { error: 'Too many authentication attempts, please try again later.' },
 });
 
+/**
+ * Rate limiting middleware for game lifecycle endpoints (/api/games).
+ * Prevents automated denial-of-service and macro bot click spamming.
+ */
 export const gameLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 60 * 1000,
   max: IS_PRODUCTION ? 120 : 5000,
@@ -30,6 +38,10 @@ export const gameLimiter: RateLimitRequestHandler = rateLimit({
   message: { error: 'Too many game actions, please slow down.' },
 });
 
+/**
+ * Rate limiting middleware for unauthenticated public endpoints (/api/public).
+ * Regulates throughput for leaderboard and completed games queries.
+ */
 export const publicLimiter: RateLimitRequestHandler = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: IS_PRODUCTION ? 300 : 5000,
@@ -66,6 +78,13 @@ const corsOptions = {
   credentials: true,
 };
 
+/**
+ * Factory creating and configuring the primary Express application instance.
+ * Sets up compression, helmet security headers, CORS policy, JSON parsing,
+ * rate limiters, API routes, 404 handler, and error middleware.
+ *
+ * @returns {Express} Fully configured Express application instance.
+ */
 export const createApp = (): Express => {
   const app = express();
   app.set('trust proxy', 1);
@@ -99,6 +118,13 @@ export const createApp = (): Express => {
   return app;
 };
 
+/**
+ * Performs graceful shutdown of database connections and the HTTP server.
+ * Invoked on SIGINT/SIGTERM process signals.
+ *
+ * @param {Server} [server] - Optional Node.js HTTP server instance to close.
+ * @returns {Promise<void>}
+ */
 export const gracefulShutdown = async (server?: Server): Promise<void> => {
   console.log('\n⏳ Gracefully shutting down RoadToUnina server...');
   try {
@@ -118,6 +144,12 @@ export const gracefulShutdown = async (server?: Server): Promise<void> => {
   process.exit(0);
 };
 
+/**
+ * Boots the Express application and begins listening on the configured PORT.
+ * Attaches SIGINT and SIGTERM listeners for graceful shutdown.
+ *
+ * @returns {Server} Running HTTP server instance.
+ */
 export const startServer = (): Server => {
   const app = createApp();
   const server = app.listen(PORT, () => {
@@ -130,7 +162,11 @@ export const startServer = (): Server => {
   return server;
 };
 
-if (require.main === module) {
+const isMainModule =
+  require.main === module ||
+  (Boolean(process.argv[1]) && /server\.(ts|js)$/.test(process.argv[1]));
+
+if (isMainModule && !IS_TEST) {
   startServer();
 }
 

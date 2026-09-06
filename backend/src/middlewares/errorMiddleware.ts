@@ -19,7 +19,7 @@ export interface ValidationErrorDetail {
 /**
  * Interface representing standard HTTP error payloads recognized by body-parsers.
  */
-export interface HttpErrorLike {
+interface HttpErrorLike {
   /**
    * Identifier string for body-parser error types (e.g., 'entity.too.large').
    */

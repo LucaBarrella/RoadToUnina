@@ -25,7 +25,16 @@ export const validateMiddleware = <T>(
   return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
       const validated: T = await schema.parseAsync(req[source]);
-      req[source] = validated;
+      if (source === 'query') {
+        Object.defineProperty(req, 'query', {
+          value: validated,
+          writable: true,
+          configurable: true,
+          enumerable: true,
+        });
+      } else {
+        req[source] = validated;
+      }
       next();
     } catch (error) {
       next(error);

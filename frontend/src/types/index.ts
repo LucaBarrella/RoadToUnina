@@ -97,14 +97,10 @@ export interface Game {
 export interface WikiArticleContent {
   /** Title of the article */
   title: string;
-  /** Canonical Wikipedia page title */
-  canonicalTitle: string;
   /** Cleaned and sanitized HTML content string */
   htmlContent: string;
   /** List of valid internal Wikipedia article link titles */
   validLinks: string[];
-  /** Flag indicating whether current article matches target goal */
-  isTarget: boolean;
 }
 
 /**
@@ -163,15 +159,4 @@ export interface LeaderboardEntry {
   completedGamesCount: number;
 }
 
-/**
- * Standard API error response schema returned by backend endpoints.
- */
-export interface ApiErrorResponse {
-  /** Human-readable error message */
-  message: string;
-  /** HTTP status code */
-  statusCode?: number;
-  /** Detailed error validation objects or array stack */
-  errors?: unknown;
-}
 

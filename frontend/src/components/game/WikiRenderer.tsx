@@ -42,9 +42,10 @@ export const NON_ENC_NAMESPACES = [
 
 /**
  * Validates whether an anchor href points to a valid Namespace 0 article.
- * @param href Target URL or relative path.
- * @param className Anchor class attribute string.
- * @returns Object with validity status and target title.
+ *
+ * @param href - Target URL or relative path attribute string.
+ * @param className - Optional anchor class attribute string.
+ * @returns Object with `isValid` boolean status and extracted `targetTitle` string or `null`.
  */
 export function isInternalNamespaceZeroLink(
   href: string,
@@ -76,7 +77,8 @@ export function isInternalNamespaceZeroLink(
         return { isValid: false, targetTitle: null };
       }
       pathname = parsedUrl.pathname;
-    } catch {
+    } catch (_urlErr) {
+      // Malformed URL syntax fallback to invalid link
       return { isValid: false, targetTitle: null };
     }
   }
@@ -93,7 +95,8 @@ export function isInternalNamespaceZeroLink(
   let decodedTitle = '';
   try {
     decodedTitle = decodeURIComponent(rawTitle).replace(/_/g, ' ').trim();
-  } catch {
+  } catch (_decodeErr) {
+    // Malformed URI percent encoding fallback to raw title
     decodedTitle = rawTitle.replace(/_/g, ' ').trim();
   }
 
@@ -109,7 +112,12 @@ export function isInternalNamespaceZeroLink(
   return { isValid: true, targetTitle: decodedTitle };
 }
 
-/** Normalizes Wikipedia links and applies DOMPurify client-side sanitization. */
+/**
+ * Normalizes Wikipedia links and applies DOMPurify client-side sanitization.
+ *
+ * @param rawHtml - Raw HTML string received from backend or external source.
+ * @returns Sanitized and normalized HTML string safe for rendering.
+ */
 export function normalizeWikiLinks(rawHtml: string): string {
   if (!rawHtml || typeof rawHtml !== 'string') return '';
 
@@ -151,12 +159,18 @@ export function normalizeWikiLinks(rawHtml: string): string {
       }
     });
     return doc.body.innerHTML;
-  } catch {
+  } catch (_domParserErr) {
+    // DOMParser parsing fallback to purified HTML
     return purified;
   }
 }
 
-/** Parses article HTML into <h2> sections for lazy rendering. */
+/**
+ * Parses article HTML into `<h2>` sections for lazy rendering and collapsible accordion display.
+ *
+ * @param html - Sanitized HTML string of the article.
+ * @returns Array of {@link WikiSection} objects representing the parsed article sections.
+ */
 export function parseWikiSections(html: string): WikiSection[] {
   if (!html) return [];
   const h2Regex = /<h2[^>]*>(.*?)<\/h2>/gi;
@@ -198,7 +212,12 @@ export function parseWikiSections(html: string): WikiSection[] {
   return sections;
 }
 
-/** Extracts target titles from .wiki-chip links. */
+/**
+ * Extracts unique target titles from `.wiki-chip` links present in the HTML.
+ *
+ * @param html - Sanitized HTML content of the article.
+ * @returns Array of unique target article title strings.
+ */
 export function extractQuickLinks(html: string): string[] {
   if (!html) return [];
   const linkSet = new Set<string>();
@@ -210,7 +229,13 @@ export function extractQuickLinks(html: string): string[] {
   return Array.from(linkSet);
 }
 
-/** Wikipedia Article Renderer with link event delegation and section accordion. */
+/**
+ * Wikipedia article renderer with link event delegation, client-side sanitization,
+ * fast quick-jump search, and section accordion display.
+ *
+ * @param props - Component properties conforming to {@link WikiRendererProps}.
+ * @returns The rendered React element.
+ */
 export const WikiRenderer: React.FC<WikiRendererProps> = ({
   title,
   htmlContent,
@@ -261,8 +286,8 @@ export const WikiRenderer: React.FC<WikiRendererProps> = ({
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    const anchor = target.closest('a');
+    if (!(e.target instanceof HTMLElement)) return;
+    const anchor = e.target.closest('a');
     if (!anchor) return;
 
     e.preventDefault();
@@ -284,8 +309,8 @@ export const WikiRenderer: React.FC<WikiRendererProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === ' ') {
-      const anchor = (e.target as HTMLElement).closest('a');
+    if (e.key === ' ' && e.target instanceof HTMLElement) {
+      const anchor = e.target.closest('a');
       if (anchor) {
         e.preventDefault();
         anchor.click();

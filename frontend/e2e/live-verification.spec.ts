@@ -30,7 +30,6 @@ test('Verify complete error recovery, invalid title rejection, and clean gamepla
   const errorAlert = page.locator('[role="alert"]');
   await expect(errorAlert).toBeVisible({ timeout: 5000 });
   const errorText = await errorAlert.innerText();
-  console.log('Displayed error text on invalid start:', errorText);
   expect(errorText).toContain('Pagina Wikipedia non trovata');
   expect(errorText).not.toContain('Request failed');
   expect(errorText).not.toContain('400');

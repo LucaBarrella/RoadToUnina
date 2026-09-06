@@ -31,9 +31,9 @@ test.describe('RoadToUnina — UX, Session Persistence & Accessibility Playtest 
   // ---------------------------------------------------------------------------
   test('1. Guest Exploration — Navigazione pubblica Leaderboard, Podio e Banner CTA', async ({ page }) => {
     // Clear localStorage to simulate an unauthenticated visitor
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.evaluate(() => localStorage.clear());
-    await page.reload();
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     // Verify Landing Page loaded with Neo-Brutalist elements
     await expect(page.locator('h1')).toContainText(/ROAD\s*TO\s*UNINA/i);

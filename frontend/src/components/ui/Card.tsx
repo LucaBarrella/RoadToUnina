@@ -1,7 +1,17 @@
 import React from 'react';
 
-/** Neobrutalist background variant options for Card container */
+/**
+ * Neobrutalist background variant options for Card container.
+ */
 export type CardVariant = 'white' | 'yellow' | 'cyan' | 'pink' | 'neutral';
+
+const CARD_BG_MAP: Record<CardVariant, string> = {
+  yellow: 'card-neo-yellow',
+  cyan: 'card-neo-cyan',
+  pink: 'card-neo-pink',
+  neutral: 'bg-surface-container border-3 border-neo-black shadow-neo text-neo-black',
+  white: 'card-neo',
+};
 
 /**
  * Component props for Card extending HTML div attributes.
@@ -21,6 +31,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
  * Reusable Neobrutalist container Card component supporting header bars and themes.
  *
  * @param props - Component props matching CardProps.
+ * @returns React card container element.
  * @example
  * ```tsx
  * <Card variant="yellow" title="Rules" icon="menu_book">
@@ -37,26 +48,11 @@ export const Card: React.FC<CardProps> = ({
   className = '',
   ...props
 }) => {
-  const getCardBg = () => {
-    switch (variant) {
-      case 'yellow':
-        return 'card-neo-yellow';
-      case 'cyan':
-        return 'card-neo-cyan';
-      case 'pink':
-        return 'card-neo-pink';
-      case 'neutral':
-        return 'bg-surface-container border-3 border-neo-black shadow-neo text-neo-black';
-      case 'white':
-      default:
-        return 'card-neo';
-    }
-  };
-
+  const cardBgClass = CARD_BG_MAP[variant] ?? CARD_BG_MAP.white;
   const isAccent = variant === 'yellow' || variant === 'cyan' || variant === 'pink';
 
   return (
-    <div className={`${getCardBg()} ${className}`} {...props}>
+    <div className={`${cardBgClass} ${className}`} {...props}>
       {title && (
         <div
           className={`border-b-3 border-neo-black p-4 flex justify-between items-center text-neo-black ${

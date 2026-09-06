@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useLeaderboard } from '../hooks';
+import { formatSeconds } from '../utils';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 
@@ -13,12 +14,6 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { completedGames, loading } = useLeaderboard(3);
-
-  const formatSeconds = (totalSeconds: number) => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="min-h-screen bg-neo-bg bg-dot-pattern flex flex-col items-center justify-between p-3 sm:p-4 md:p-8 text-neo-black">
@@ -119,7 +114,7 @@ export const HomePage: React.FC = () => {
                   </header>
 
                   <div className="space-y-2 font-inter text-sm">
-                    <div className="flex justify-between items-center border-b border-dashed border-gray-400 pb-1">
+                    <div className="flex justify-between items-center border-b border-dashed border-outline pb-1">
                       <span className="font-mono text-xs uppercase font-bold text-neo-black">Tempo:</span>
                       <span className="font-mono font-bold bg-neo-pink text-neo-on-accent px-2 py-0.5 border border-neo-black text-xs">
                         {formatSeconds(g.durationSeconds)}

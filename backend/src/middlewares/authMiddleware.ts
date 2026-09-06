@@ -20,6 +20,18 @@ export interface JwtPayload {
 }
 
 /**
+ * Runtime type guard asserting that an arbitrary decoded value satisfies {@link JwtPayload}.
+ *
+ * @param val - Unknown decoded payload to inspect.
+ * @returns `true` if `val` contains valid string `id` and `username` properties.
+ */
+export function isJwtPayload(val: unknown): val is JwtPayload {
+  if (typeof val !== 'object' || val === null) return false;
+  const candidate = val as Record<string, unknown>;
+  return typeof candidate.id === 'string' && typeof candidate.username === 'string';
+}
+
+/**
  * JWT Authentication Guard Middleware.
  * Extracts the Bearer token from the `Authorization` header, verifies its cryptographic signature
  * using `JWT_SECRET`, and attaches the decoded user payload to `req.user`.
@@ -50,10 +62,14 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+    const decoded: unknown = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+    if (!isJwtPayload(decoded)) {
+      return next(new AppError('Unauthorized: Malformed token payload', 401, ErrorCode.UNAUTHORIZED));
+    }
     req.user = decoded;
     next();
-  } catch {
+  } catch (_jwtErr) {
+    // Treat any signature verification failure, expired token, or crypto error as 401 Unauthorized
     return next(new AppError('Unauthorized: Invalid or expired token', 401, ErrorCode.UNAUTHORIZED));
   }
 };

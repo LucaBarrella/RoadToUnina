@@ -41,6 +41,12 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+/**
+ * Root application component configuring global authentication provider,
+ * client-side routing, and main layout structure.
+ *
+ * @returns The root React application element.
+ */
 export function App() {
   return (
     <AuthProvider>

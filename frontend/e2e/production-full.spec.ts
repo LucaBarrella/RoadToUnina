@@ -27,7 +27,6 @@ test('Verify complete end-to-end user experience on LIVE production (Vercel + Re
   const errorAlert = page.locator('[role="alert"]');
   await expect(errorAlert).toBeVisible({ timeout: 10000 });
   const errorText = await errorAlert.innerText();
-  console.log('Production Error Banner Text:', errorText);
   expect(errorText).toContain('Pagina Wikipedia non trovata');
 
   await page.screenshot({ path: 'e2e-screenshots/live-prod-1-error-banner.png' });
@@ -48,6 +47,4 @@ test('Verify complete end-to-end user experience on LIVE production (Vercel + Re
   await expect(page.locator('aside[aria-label="Pannello di controllo della partita (HUD)"]')).toBeVisible();
 
   await page.screenshot({ path: 'e2e-screenshots/live-prod-2-active-game.png' });
-
-  console.log('SUCCESS: Full live production verification passed 100%!');
 });

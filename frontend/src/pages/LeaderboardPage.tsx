@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useLeaderboard } from '../hooks';
+import { formatSeconds } from '../utils';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 
@@ -13,12 +14,6 @@ export const LeaderboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { leaderboard, completedGames, loading, error, refetch } = useLeaderboard(50);
-
-  const formatSeconds = (totalSecs: number) => {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   return (
     <div className="min-h-screen bg-neo-bg bg-dot-pattern p-3 sm:p-4 md:p-8 text-neo-black">
@@ -122,7 +117,7 @@ export const LeaderboardPage: React.FC = () => {
                                 : entry.rank === 2
                                 ? 'bg-surface-container-high text-neo-black'
                                 : entry.rank === 3
-                                ? 'bg-amber-400 text-neo-on-accent'
+                                ? 'bg-neo-pink text-neo-on-accent'
                                 : 'bg-neo-surface text-neo-black'
                             }`}
                           >
@@ -196,7 +191,7 @@ export const LeaderboardPage: React.FC = () => {
                               {g.startPageTitle} ➔ Unina
                             </span>
                           </div>
-                          <span className="font-normal text-[11px] text-gray-700">
+                          <span className="font-normal text-[11px] text-on-surface-variant">
                             {g.clickCount} {g.clickCount === 1 ? 'click' : 'click'} • {formatSeconds(g.durationSeconds)}
                           </span>
                         </div>
@@ -217,7 +212,7 @@ export const LeaderboardPage: React.FC = () => {
                                   {st.pageTitle}
                                 </span>
                                 {idx < g.steps.length - 1 && (
-                                  <span className="font-bold text-gray-500">➔</span>
+                                  <span className="font-bold text-on-surface-variant">➔</span>
                                 )}
                               </React.Fragment>
                             ))

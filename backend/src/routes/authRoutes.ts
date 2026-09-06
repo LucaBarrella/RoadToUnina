@@ -3,8 +3,6 @@ import { z, ZodType } from 'zod';
 import { authService, RegisterDTO, LoginDTO, AuthResponse, UserProfile } from '../services/authService';
 import { validateMiddleware } from '../middlewares/validateMiddleware';
 import { authMiddleware } from '../middlewares/authMiddleware';
-import { AppError } from '../middlewares/errorMiddleware';
-import { ErrorCode } from '../constants/errorCodes';
 
 /** Zod validation schema for registration payload. */
 export const registerSchema: ZodType<RegisterDTO> = z.object({
@@ -56,9 +54,7 @@ router.post('/login', validateMiddleware(loginSchema, 'body'), async (req, res, 
  */
 router.get('/me', authMiddleware, async (req, res, next) => {
   try {
-    const userId = req.user?.id;
-    if (!userId) throw new AppError('Unauthorized: User session missing', 401, ErrorCode.UNAUTHORIZED);
-    const user: UserProfile = await authService.getProfile(userId);
+    const user: UserProfile = await authService.getProfile(req.user!.id);
     res.status(200).json(user);
   } catch (error) {
     next(error);

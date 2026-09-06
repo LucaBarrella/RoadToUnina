@@ -15,7 +15,7 @@ export interface WikiArticleContent {
 }
 
 /** Raw Wikipedia API parse link object. */
-export interface WikiParseLink {
+interface WikiParseLink {
   ns?: number;
   '*'?: string;
 }
@@ -52,10 +52,11 @@ export const NON_ENC_NAMESPACES = [
 ];
 
 /**
- * Evaluates whether an anchor href points to a valid Namespace 0 article.
- * @param href Anchor target href.
- * @param className Anchor class attribute string.
- * @returns Object with validity status and extracted target title.
+ * Evaluates whether an anchor href points to a valid Namespace 0 (main encyclopedic) article.
+ *
+ * @param href - Anchor target href attribute string.
+ * @param className - Optional anchor class attribute string.
+ * @returns An object containing `isValid` boolean and the extracted `targetTitle` string or `null`.
  */
 export function isInternalNamespaceZeroLink(
   href: string,
@@ -88,7 +89,8 @@ export function isInternalNamespaceZeroLink(
         return { isValid: false, targetTitle: null };
       }
       pathname = parsed.pathname;
-    } catch {
+    } catch (_urlErr) {
+      // Invalid URL syntax or malformed URI component
       return { isValid: false, targetTitle: null };
     }
   }
@@ -105,7 +107,8 @@ export function isInternalNamespaceZeroLink(
   let decoded = '';
   try {
     decoded = decodeURIComponent(rawTitle).replace(/_/g, ' ').trim();
-  } catch {
+  } catch (_decodeErr) {
+    // Malformed URI percent encoding fallback to raw title
     decoded = rawTitle.replace(/_/g, ' ').trim();
   }
 
@@ -168,12 +171,23 @@ export const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   },
 };
 
-/** Normalizes article title to an LRU cache key. */
+/**
+ * Normalizes a Wikipedia article title to an LRU cache key by replacing underscores with spaces,
+ * trimming whitespace, and converting to lowercase.
+ *
+ * @param title - Raw Wikipedia article title.
+ * @returns Lowercase normalized cache key string.
+ */
 export function normalizeWikiCacheKey(title: string): string {
   return title.replace(/_/g, ' ').trim().toLowerCase();
 }
 
-/** Extracts target link titles from sanitized HTML. */
+/**
+ * Extracts valid target link titles from sanitized HTML by inspecting `data-title` attributes.
+ *
+ * @param html - The sanitized HTML string of the Wikipedia article.
+ * @returns An array of unique article titles linked within the HTML.
+ */
 export function extractValidLinksFromHtml(html: string): string[] {
   if (!html) return [];
   const linkSet = new Set<string>();
@@ -194,12 +208,15 @@ export const wikiArticleCache = new LRUCache<string, WikiArticleContent>({
   ttl: 1000 * 60 * 60,
 });
 
-/** Service managing Wikipedia API fetching, parsing, link validation, and caching. */
+/**
+ * Service managing Wikipedia API communication, HTML parsing, link validation, and in-memory LRU caching.
+ */
 export class WikiService {
   /**
-   * Fetches a random article title from Italian Wikipedia (ns=0).
-   * @returns Random article title.
-   * @throws AppError 502 Bad Gateway if Wikipedia API call fails.
+   * Fetches a random encyclopedic article title from Italian Wikipedia (Namespace 0).
+   *
+   * @returns A Promise resolving to a random article title string.
+   * @throws {AppError} 502 Bad Gateway if the Wikipedia API call fails or returns empty data.
    */
   public async getRandomWikiArticle(): Promise<string> {
     try {
@@ -222,10 +239,14 @@ export class WikiService {
 
   /**
    * Retrieves parsed, sanitized HTML content and valid internal links for an article.
-   * @param title Title of the Wikipedia article.
-   * @param depth Recursion depth for search fallback (max 1).
-   * @returns Article title, sanitized HTML, and array of valid link titles.
-   * @throws AppError 400 if title empty, 404 if article not found, 502 on API failure.
+   * Checks in-memory LRU cache before querying the Wikipedia API.
+   *
+   * @param title - Title of the Wikipedia article to retrieve.
+   * @param depth - Recursion depth for search fallback (defaults to 0, max 1).
+   * @returns A Promise resolving to {@link WikiArticleContent} containing title, sanitized HTML, and valid links.
+   * @throws {AppError} 400 Bad Request if title is empty or invalid.
+   * @throws {AppError} 404 Not Found if the article does not exist on Wikipedia.
+   * @throws {AppError} 502 Bad Gateway if the Wikipedia API communication fails.
    */
   public async getWikiArticleContent(title: string, depth = 0): Promise<WikiArticleContent> {
     if (!title || typeof title !== 'string' || title.trim().length === 0) {
@@ -260,7 +281,9 @@ export class WikiService {
             if (Array.isArray(searchResults) && searchResults.length > 0 && searchResults[0]?.title) {
               return await this.getWikiArticleContent(searchResults[0].title, depth + 1);
             }
-          } catch {}
+          } catch (_searchErr) {
+            // Wikipedia search fallback failed or returned no match, proceed to throw 404
+          }
         }
 
         throw new AppError(`Pagina Wikipedia non trovata per: "${title}"`, 404, ErrorCode.WIKI_PAGE_NOT_FOUND);
@@ -290,12 +313,17 @@ export class WikiService {
     }
   }
 
-  /** Clears the in-memory Wikipedia LRU cache. */
+  /**
+   * Clears all entries from the in-memory Wikipedia LRU cache.
+   */
   public clearCache(): void {
     wikiArticleCache.clear();
   }
 }
 
+/**
+ * Singleton instance of the {@link WikiService}.
+ */
 export const wikiService = new WikiService();
 
 

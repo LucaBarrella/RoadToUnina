@@ -19,35 +19,43 @@ export const TARGET_PAGE_TITLE = 'Università degli Studi di Napoli Federico II'
 export const EXPIRATION_HOURS = 24;
 
 /**
- * Normalizes Wikipedia article title for strict comparison.
- * @param title Raw title string.
- * @returns Normalized lowercase title.
+ * Normalizes a Wikipedia article title for strict comparison by decoding URI components,
+ * replacing underscores with spaces, trimming whitespace, and converting to lowercase.
+ *
+ * @param title - Raw article title string.
+ * @returns Normalized lowercase title string.
  */
 export function normalizeWikiTitle(title: string): string {
   try {
     return decodeURIComponent(title).replace(/_/g, ' ').trim().toLowerCase();
-  } catch {
+  } catch (_decodeErr) {
+    // Malformed URI percent encoding fallback to raw title
     return title.replace(/_/g, ' ').trim().toLowerCase();
   }
 }
 
 /**
- * Checks if a game session has expired (>24 hours of inactivity).
- * @param lastActivity Date of last activity (updatedAt).
- * @returns True if expired.
+ * Checks if a game session has expired due to exceeding the inactivity timeout threshold.
+ *
+ * @param lastActivity - Timestamp of last activity (updatedAt or startTime).
+ * @returns `true` if the duration since last activity exceeds {@link EXPIRATION_HOURS}, otherwise `false`.
  */
 export function isGameExpired(lastActivity: Date): boolean {
   return (Date.now() - new Date(lastActivity).getTime()) / (1000 * 60 * 60) > EXPIRATION_HOURS;
 }
 
-/** Service managing game session lifecycle, anti-cheat validation, and step progression. */
+/**
+ * Service managing game session lifecycle, anti-cheat step validation, and player progression.
+ */
 export class GameService {
   /**
-   * Starts a new game session for the user.
-   * @param userId Authenticated user ID.
-   * @param overrideStartPage Optional start page for testing.
-   * @returns Active game session and starting article content.
-   * @throws AppError 400 if user has an active non-expired game.
+   * Starts a new game session for the specified user.
+   * Checks for active games and marks expired games as abandoned.
+   *
+   * @param userId - Unique identifier of the authenticated user.
+   * @param overrideStartPage - Optional explicit starting article title (used for deterministic testing).
+   * @returns A Promise resolving to {@link ActiveGameResponse} containing the created game session and initial article.
+   * @throws {AppError} 400 Bad Request if the user already has an active, non-expired game session.
    */
   public async startGame(userId: string, overrideStartPage?: string): Promise<ActiveGameResponse> {
     let rawStartTitle = overrideStartPage?.trim() || await wikiService.getRandomWikiArticle();
@@ -116,9 +124,11 @@ export class GameService {
   }
 
   /**
-   * Fetches active game for user with rendered article content.
-   * @param userId Authenticated user ID.
-   * @returns Active game response or null if none active.
+   * Fetches the currently active game session for a user along with rendered article content.
+   * Automatically marks expired games or games with inaccessible pages as abandoned.
+   *
+   * @param userId - Unique identifier of the authenticated user.
+   * @returns A Promise resolving to {@link ActiveGameResponse} if active, or `null` if no active session exists.
    */
   public async getActiveGame(userId: string): Promise<ActiveGameResponse | null> {
     const game = await prisma.game.findFirst({
@@ -136,19 +146,24 @@ export class GameService {
     try {
       const currentArticle = await wikiService.getWikiArticleContent(game.currentPageTitle);
       return { game, currentArticle };
-    } catch {
+    } catch (_fetchErr) {
+      // If the Wikipedia page is permanently inaccessible or corrupt, mark session abandoned
       await prisma.game.update({ where: { id: game.id }, data: { status: GameStatus.ABANDONED } });
       return null;
     }
   }
 
   /**
-   * Performs a step navigation in the current game.
-   * @param userId Authenticated user ID.
-   * @param gameId Game ID.
-   * @param targetTitle Target article title clicked.
-   * @returns Updated game session and target article HTML.
-   * @throws AppError 404 if game not found, 400 if link invalid (anti-cheat), 409 on race condition.
+   * Performs a navigation step from the current article to a target article within an active game session.
+   * Validates that the target link exists on the current page to prevent cheating.
+   *
+   * @param userId - Unique identifier of the authenticated user.
+   * @param gameId - Unique identifier of the active game session.
+   * @param targetTitle - Title of the Wikipedia article clicked by the player.
+   * @returns A Promise resolving to {@link ActiveGameResponse} with updated game state and target article HTML.
+   * @throws {AppError} 404 Not Found if the game does not exist or does not belong to the user.
+   * @throws {AppError} 400 Bad Request if the requested link is invalid or not reachable from the current page.
+   * @throws {AppError} 409 Conflict if a concurrent step request advanced the game state.
    */
   public async makeStep(userId: string, gameId: string, targetTitle: string): Promise<ActiveGameResponse> {
     const normalizedTarget = normalizeWikiTitle(targetTitle);
@@ -212,11 +227,12 @@ export class GameService {
   }
 
   /**
-   * Forfeits/abandons an active game.
-   * @param userId Authenticated user ID.
-   * @param gameId Game ID to abandon.
-   * @returns Updated Game object with ABANDONED status.
-   * @throws AppError 404 if active game not found.
+   * Forfeits and abandons an active game session for the specified user.
+   *
+   * @param userId - Unique identifier of the authenticated user.
+   * @param gameId - Unique identifier of the game session to abandon.
+   * @returns A Promise resolving to the updated {@link Game} record with ABANDONED status.
+   * @throws {AppError} 404 Not Found if active game is not found or does not belong to user.
    */
   public async abandonGame(userId: string, gameId: string): Promise<Game> {
     const game = await prisma.game.findFirst({
@@ -232,6 +248,9 @@ export class GameService {
   }
 }
 
+/**
+ * Singleton instance of the {@link GameService}.
+ */
 export const gameService = new GameService();
 
 

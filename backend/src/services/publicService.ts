@@ -38,10 +38,11 @@ export interface LeaderboardEntry {
 }
 
 /**
- * Calculates duration in seconds between game start and completion timestamps.
- * @param startTime Game start date.
- * @param endTime Game completion date or null.
- * @returns Duration in whole seconds, or null if uncompleted.
+ * Calculates duration in whole seconds between game start and completion timestamps.
+ *
+ * @param startTime - The game start timestamp.
+ * @param endTime - The game completion timestamp, or `null` if the game is incomplete.
+ * @returns Duration in whole seconds, or `null` if `endTime` is not provided.
  */
 export function calculateDurationInSeconds(startTime: Date, endTime: Date | null): number | null {
   if (!endTime) return null;
@@ -51,9 +52,10 @@ export function calculateDurationInSeconds(startTime: Date, endTime: Date | null
 /** Service managing public queries for completed games and global leaderboards. */
 export class PublicService {
   /**
-   * Retrieves recently completed games with navigation steps.
-   * @param limit Max games to return (default 20).
-   * @returns List of completed games.
+   * Retrieves recently completed games ordered chronologically by completion time with navigation steps.
+   *
+   * @param limit - Maximum number of completed games to return (defaults to 20).
+   * @returns A Promise resolving to an array of {@link CompletedGameView} objects.
    */
   public async getCompletedGames(limit = 20): Promise<CompletedGameView[]> {
     const games = await prisma.game.findMany({
@@ -80,12 +82,12 @@ export class PublicService {
   }
 
   /**
-   * Computes global leaderboard rankings using pure Prisma ORM methods.
-   * Leverages Prisma aggregation and bounded user/game relation queries.
-   * Ranks players by fewest clicks (ASC), shortest duration (ASC), and total games (DESC).
+   * Computes global leaderboard rankings using pure Prisma ORM aggregation and relation queries.
+   * Ranks players primarily by fewest clicks (ASC), secondarily by shortest duration (ASC),
+   * and tertiarily by total completed games (DESC).
    *
-   * @param limit Max rankings to return (default 50).
-   * @returns Ranked leaderboard list matching LeaderboardEntry schema.
+   * @param limit - Maximum number of player rankings to return (defaults to 50, bounded between 1 and 100).
+   * @returns A Promise resolving to an array of {@link LeaderboardEntry} records.
    */
   public async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
     const safeLimit = Math.min(100, Math.max(1, limit));
@@ -211,6 +213,9 @@ export class PublicService {
   }
 }
 
+/**
+ * Singleton instance of the {@link PublicService}.
+ */
 export const publicService = new PublicService();
 
 

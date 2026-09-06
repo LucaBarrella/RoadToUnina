@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Game, WikiArticleContent } from '../types';
 import { gameApi } from '../api';
@@ -30,8 +30,8 @@ export interface UseGameEngineReturn {
   makeStep: (targetTitle: string) => Promise<void>;
   /** Abandons current game session */
   abandonGame: () => Promise<void>;
+  /** State dispatcher for the error banner message */
   setError: React.Dispatch<React.SetStateAction<string | null>>;
-  setToastMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 /** Hook managing speedrun game session state, timer, and step actions. */
@@ -42,6 +42,7 @@ export function useGameEngine(): UseGameEngineReturn {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const isNavigatingRef = useRef(false);
 
 
   const showToast = useCallback((msg = 'Link non valido o non enciclopedico') => {
@@ -74,30 +75,53 @@ export function useGameEngine(): UseGameEngineReturn {
     }
   }, [game?.id, game?.status, game?.startTime, game?.endTime]);
 
+/**
+ * Safely extracts the machine-readable error code string from an arbitrary Axios or unknown error.
+ *
+ * @param err - Unknown error object.
+ * @returns Error code string or undefined if absent.
+ */
+function getApiErrorCode(err: unknown): string | undefined {
+  if (axios.isAxiosError(err) && typeof err.response?.data === 'object' && err.response.data !== null) {
+    const data = err.response.data as Record<string, unknown>;
+    if (typeof data.code === 'string') {
+      return data.code;
+    }
+  }
+  return undefined;
+}
+
   const getErrorMessage = (err: unknown, fallback: string): string => {
     if (axios.isAxiosError(err)) {
-      const data = err.response?.data as { error?: string; message?: string; code?: string } | string;
-      const code = typeof data === 'object' ? data?.code : undefined;
-      const serverErr = typeof data === 'string' ? data : data?.error || data?.message;
+      const code = getApiErrorCode(err);
+      const data = err.response?.data;
+      const serverErr =
+        typeof data === 'string'
+          ? data
+          : typeof data === 'object' && data !== null && 'error' in data && typeof (data as Record<string, unknown>).error === 'string'
+          ? ((data as Record<string, unknown>).error as string)
+          : typeof data === 'object' && data !== null && 'message' in data && typeof (data as Record<string, unknown>).message === 'string'
+          ? ((data as Record<string, unknown>).message as string)
+          : undefined;
 
       // Handle structured machine-readable error codes first
       if (code) {
         switch (code) {
-          case 'ACTIVE_GAME_EXISTS':
+          case ErrorCode.ACTIVE_GAME_EXISTS:
             return 'Hai già una partita attiva in corso.';
-          case 'INVALID_WIKI_TITLE':
-          case 'VALIDATION_ERROR':
+          case ErrorCode.INVALID_WIKI_TITLE:
+          case ErrorCode.VALIDATION_ERROR:
             return 'Titolo della voce non valido.';
-          case 'WIKI_PAGE_NOT_FOUND':
+          case ErrorCode.WIKI_PAGE_NOT_FOUND:
             return 'Pagina Wikipedia non trovata.';
-          case 'NOT_FOUND':
-          case 'GAME_NOT_FOUND':
+          case ErrorCode.NOT_FOUND:
+          case ErrorCode.GAME_NOT_FOUND:
             return 'Risorsa non trovata.';
-          case 'INVALID_STEP':
+          case ErrorCode.INVALID_STEP:
             return 'Link non valido o non presente nella pagina corrente.';
-          case 'CONCURRENT_CONFLICT':
+          case ErrorCode.CONCURRENT_CONFLICT:
             return 'Conflitto di sincronizzazione: la partita è già avanzata.';
-          case 'WIKI_API_ERROR':
+          case ErrorCode.WIKI_API_ERROR:
             return 'Errore di comunicazione con Wikipedia.';
         }
       }
@@ -150,7 +174,7 @@ export function useGameEngine(): UseGameEngineReturn {
       setCurrentArticle(activeData.currentArticle);
       return activeData.game;
     } catch (err: unknown) {
-      if (axios.isAxiosError(err) && (err.response?.status === 400 || (err.response?.data as { code?: string })?.code === ErrorCode.ACTIVE_GAME_EXISTS)) {
+      if (axios.isAxiosError(err) && (err.response?.status === 400 || getApiErrorCode(err) === ErrorCode.ACTIVE_GAME_EXISTS)) {
         try {
           const activeData = await gameApi.getActiveGame();
           if (activeData?.game) {
@@ -158,7 +182,9 @@ export function useGameEngine(): UseGameEngineReturn {
             setCurrentArticle(activeData.currentArticle);
             return activeData.game;
           }
-        } catch {}
+        } catch (_activeErr) {
+          // Resyncing active game session failed, proceed to handle original startup error
+        }
       }
       const msg = getErrorMessage(err, 'Impossibile avviare una nuova partita.');
       setError(msg);
@@ -169,7 +195,8 @@ export function useGameEngine(): UseGameEngineReturn {
   };
 
   const makeStep = async (targetTitle: string) => {
-    if (!game || loading) return;
+    if (!game || loading || isNavigatingRef.current) return;
+    isNavigatingRef.current = true;
     try {
       setLoading(true);
       setError(null);
@@ -177,9 +204,26 @@ export function useGameEngine(): UseGameEngineReturn {
       setGame(activeData.game);
       setCurrentArticle(activeData.currentArticle);
     } catch (err: unknown) {
-      const code = axios.isAxiosError(err) ? (err.response?.data as { code?: string })?.code : undefined;
-      if (code === 'INVALID_STEP' || code === 'WIKI_PAGE_NOT_FOUND') {
-        showToast(code === 'WIKI_PAGE_NOT_FOUND' ? 'Pagina Wikipedia non trovata.' : 'Link non valido o non presente nella pagina corrente.');
+      const code = getApiErrorCode(err);
+      if (
+        axios.isAxiosError(err) &&
+        (err.response?.status === 409 || code === ErrorCode.CONCURRENT_CONFLICT)
+      ) {
+        try {
+          const activeData = await gameApi.getActiveGame();
+          if (activeData?.game) {
+            setGame(activeData.game);
+            setCurrentArticle(activeData.currentArticle);
+            setError(null);
+            return;
+          }
+        } catch (_syncErr) {
+          // Fall through to default error handling if resync fails
+        }
+      }
+
+      if (code === ErrorCode.INVALID_STEP || code === ErrorCode.WIKI_PAGE_NOT_FOUND) {
+        showToast(code === ErrorCode.WIKI_PAGE_NOT_FOUND ? 'Pagina Wikipedia non trovata.' : 'Link non valido o non presente nella pagina corrente.');
       } else if (axios.isAxiosError(err) && (err.response?.status === 400 || err.response?.status === 404)) {
         showToast(err.response?.status === 404 ? 'Pagina Wikipedia non trovata.' : 'Link non valido o non enciclopedico');
       } else {
@@ -191,6 +235,7 @@ export function useGameEngine(): UseGameEngineReturn {
         }
       }
     } finally {
+      isNavigatingRef.current = false;
       setLoading(false);
     }
   };
@@ -213,7 +258,7 @@ export function useGameEngine(): UseGameEngineReturn {
   return {
     game, currentArticle, elapsedSeconds, loading, error, toastMessage,
     showToast, hideToast, startNewGame, loadActiveGame, makeStep, abandonGame,
-    setError, setToastMessage,
+    setError,
   };
 }
 
