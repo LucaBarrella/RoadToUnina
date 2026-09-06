@@ -80,17 +80,75 @@ export class PublicService {
   }
 
   /**
-   * Computes global leaderboard rankings (clicks ASC, duration ASC, games DESC).
+   * Computes global leaderboard rankings using pure Prisma ORM methods.
+   * Leverages Prisma aggregation and bounded user/game relation queries.
+   * Ranks players by fewest clicks (ASC), shortest duration (ASC), and total games (DESC).
+   *
    * @param limit Max rankings to return (default 50).
-   * @returns Ranked leaderboard list.
+   * @returns Ranked leaderboard list matching LeaderboardEntry schema.
    */
   public async getLeaderboard(limit = 50): Promise<LeaderboardEntry[]> {
-    const completedGames = await prisma.game.findMany({
-      where: { status: GameStatus.COMPLETED, endTime: { not: null } },
-      include: { user: { select: { id: true, username: true } } },
+    const safeLimit = Math.min(100, Math.max(1, limit));
+
+    // 1. Fetch top user aggregations using standard Prisma groupBy
+    const candidateGroups = await prisma.game.groupBy({
+      by: ['userId'],
+      where: {
+        status: GameStatus.COMPLETED,
+        endTime: { not: null },
+      },
+      _count: {
+        _all: true,
+      },
+      _min: {
+        clickCount: true,
+      },
+      orderBy: [
+        { _min: { clickCount: 'asc' } },
+        { _count: { id: 'desc' } },
+      ],
+      take: safeLimit * 3, // Bounded candidate pool to account for secondary duration ordering
     });
 
-    interface RawUserStats {
+    if (candidateGroups.length === 0) {
+      return [];
+    }
+
+    const candidateUserIds = candidateGroups.map((g) => g.userId);
+    const countMap = new Map<string, number>();
+    for (const g of candidateGroups) {
+      countMap.set(g.userId, g._count._all);
+    }
+
+    // 2. Fetch user profiles and their top completed runs using standard Prisma findMany
+    const usersWithGames = await prisma.user.findMany({
+      where: {
+        id: { in: candidateUserIds },
+      },
+      select: {
+        id: true,
+        username: true,
+        games: {
+          where: {
+            status: GameStatus.COMPLETED,
+            endTime: { not: null },
+          },
+          orderBy: [
+            { clickCount: 'asc' },
+            { startTime: 'asc' },
+          ],
+          take: 10, // Bounded game history per candidate user
+          select: {
+            clickCount: true,
+            startTime: true,
+            endTime: true,
+          },
+        },
+      },
+    });
+
+    // 3. Compute best run per candidate user
+    interface UserLeaderboardCandidate {
       userId: string;
       username: string;
       completedGamesCount: number;
@@ -98,45 +156,54 @@ export class PublicService {
       bestDurationSeconds: number;
     }
 
-    const userStatsMap = new Map<string, RawUserStats>();
+    const candidates: UserLeaderboardCandidate[] = [];
 
-    for (const game of completedGames) {
-      if (!game.endTime) continue;
-      const durationSeconds = calculateDurationInSeconds(game.startTime, game.endTime) ?? 0;
-      const existing = userStatsMap.get(game.userId);
+    for (const user of usersWithGames) {
+      if (user.games.length === 0) continue;
 
-      if (!existing) {
-        userStatsMap.set(game.userId, {
-          userId: game.userId,
-          username: game.user.username,
-          completedGamesCount: 1,
-          bestClickCount: game.clickCount,
-          bestDurationSeconds: durationSeconds,
-        });
-        continue;
+      let bestClickCount = Number.MAX_SAFE_INTEGER;
+      let bestDurationSeconds = Number.MAX_SAFE_INTEGER;
+
+      for (const game of user.games) {
+        if (!game.endTime) continue;
+        const durationSeconds = calculateDurationInSeconds(game.startTime, game.endTime) ?? 0;
+
+        const isFewerClicks = game.clickCount < bestClickCount;
+        const isSameClicksFaster = game.clickCount === bestClickCount && durationSeconds < bestDurationSeconds;
+
+        if (isFewerClicks || isSameClicksFaster) {
+          bestClickCount = game.clickCount;
+          bestDurationSeconds = durationSeconds;
+        }
       }
 
-      existing.completedGamesCount += 1;
-      const isFewerClicks = game.clickCount < existing.bestClickCount;
-      const isSameClicksFaster = game.clickCount === existing.bestClickCount && durationSeconds < existing.bestDurationSeconds;
-
-      if (isFewerClicks || isSameClicksFaster) {
-        existing.bestClickCount = game.clickCount;
-        existing.bestDurationSeconds = durationSeconds;
+      if (bestClickCount !== Number.MAX_SAFE_INTEGER) {
+        candidates.push({
+          userId: user.id,
+          username: user.username,
+          completedGamesCount: countMap.get(user.id) ?? user.games.length,
+          bestClickCount,
+          bestDurationSeconds,
+        });
       }
     }
 
-    const sortedStats = Array.from(userStatsMap.values()).sort((a, b) => {
+    // 4. Sort candidates strictly: lowest clicks first, shortest duration, most games completed
+    candidates.sort((a, b) => {
       if (a.bestClickCount !== b.bestClickCount) return a.bestClickCount - b.bestClickCount;
       if (a.bestDurationSeconds !== b.bestDurationSeconds) return a.bestDurationSeconds - b.bestDurationSeconds;
       return b.completedGamesCount - a.completedGamesCount;
     });
 
-    return sortedStats.slice(0, limit).map((entry, index) => ({
+    // 5. Slice to requested limit and format output
+    return candidates.slice(0, safeLimit).map((entry, index) => ({
       rank: index + 1,
       userId: entry.userId,
       username: entry.username,
-      user: { id: entry.userId, username: entry.username },
+      user: {
+        id: entry.userId,
+        username: entry.username,
+      },
       completedGamesCount: entry.completedGamesCount,
       bestClickCount: entry.bestClickCount,
       bestDurationSeconds: entry.bestDurationSeconds,

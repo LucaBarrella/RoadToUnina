@@ -1,4 +1,4 @@
-import { Game, GameStep, GameStatus } from '@prisma/client';
+import { Game, GameStep, GameStatus, Prisma } from '@prisma/client';
 import { prisma } from '../config/db';
 import { wikiService, WikiArticleContent } from './wikiService';
 import { AppError } from '../middlewares/errorMiddleware';
@@ -60,53 +60,59 @@ export class GameService {
     const currentArticle = await wikiService.getWikiArticleContent(rawStartTitle);
     const startTitle = currentArticle.title || rawStartTitle;
 
-    const createdGame = await prisma.$transaction(
-      async (tx) => {
-        // Acquire row lock on user record to serialize concurrent startGame requests in READ COMMITTED
-        if (tx.user?.update) {
-          try {
-            await tx.user.update({ where: { id: userId }, data: { updatedAt: new Date() } });
-          } catch {}
-        }
-
-        const existingGame = await tx.game.findFirst({
-          where: { userId, status: GameStatus.IN_PROGRESS },
-        });
-
-        if (existingGame) {
-          if (!isGameExpired(existingGame.updatedAt || existingGame.startTime)) {
-            throw new AppError('User already has an active game in progress', 400, ErrorCode.ACTIVE_GAME_EXISTS);
-          }
-          await tx.game.update({
-            where: { id: existingGame.id },
-            data: { status: GameStatus.ABANDONED },
+    try {
+      const createdGame = await prisma.$transaction(
+        async (tx) => {
+          // Row lock on User record to serialize concurrent requests for the same user
+          await tx.user.update({
+            where: { id: userId },
+            data: { updatedAt: new Date() },
           });
-        }
 
-        const game = await tx.game.create({
-          data: {
-            userId,
-            startPageTitle: startTitle,
-            currentPageTitle: startTitle,
-            targetPageTitle: TARGET_PAGE_TITLE,
-            status: GameStatus.IN_PROGRESS,
-            clickCount: 0,
-          },
-        });
+          const existingGame = await tx.game.findFirst({
+            where: { userId, status: GameStatus.IN_PROGRESS },
+          });
 
-        await tx.gameStep.create({
-          data: { gameId: game.id, pageTitle: startTitle, stepOrder: 1 },
-        });
+          if (existingGame) {
+            if (!isGameExpired(existingGame.updatedAt || existingGame.startTime)) {
+              throw new AppError('User already has an active game in progress', 400, ErrorCode.ACTIVE_GAME_EXISTS);
+            }
+            await tx.game.update({
+              where: { id: existingGame.id },
+              data: { status: GameStatus.ABANDONED },
+            });
+          }
 
-        return tx.game.findUniqueOrThrow({
-          where: { id: game.id },
-          include: { steps: { orderBy: { stepOrder: 'asc' } } },
-        });
-      },
-      { timeout: 10000 }
-    );
+          const game = await tx.game.create({
+            data: {
+              userId,
+              startPageTitle: startTitle,
+              currentPageTitle: startTitle,
+              targetPageTitle: TARGET_PAGE_TITLE,
+              status: GameStatus.IN_PROGRESS,
+              clickCount: 0,
+            },
+          });
 
-    return { game: createdGame, currentArticle };
+          await tx.gameStep.create({
+            data: { gameId: game.id, pageTitle: startTitle, stepOrder: 1 },
+          });
+
+          return tx.game.findUniqueOrThrow({
+            where: { id: game.id },
+            include: { steps: { orderBy: { stepOrder: 'asc' } } },
+          });
+        },
+        { timeout: 10000 }
+      );
+
+      return { game: createdGame, currentArticle };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new AppError('User already has an active game in progress', 400, ErrorCode.ACTIVE_GAME_EXISTS);
+      }
+      throw error;
+    }
   }
 
   /**
