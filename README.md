@@ -10,8 +10,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-v5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-v18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v3.4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Vitest](https://img.shields.io/badge/Vitest-53%2F53%20Passing%20(100%25)-44A833?logo=vitest&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
+[![Vitest](https://img.shields.io/badge/Vitest-58%2F58%20Passing%20(100%25)-44A833?logo=vitest&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
 [![Playwright E2E](https://img.shields.io/badge/Playwright_E2E-19%2F19%20Passing%20(100%25)-2EAD33?logo=playwright&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
+[![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-6BA539?logo=openapiinitiative&logoColor=white)](https://roadtounina-backend.onrender.com/api/docs)
+[![Swagger UI](https://img.shields.io/badge/Swagger_UI-Interactive_Docs-85EA2D?logo=swagger&logoColor=black)](https://roadtounina-backend.onrender.com/api/docs)
 
 Elaborato progettuale e implementazione full-stack per la traccia d'esame **RoadToUnina**: una piattaforma web competitiva in cui gli utenti registrati avviano una sfida partendo da una voce casuale estratta in tempo reale da Wikipedia e navigano, **esclusivamente attraverso i collegamenti ipertestuali interni verificati dal server**, per raggiungere la pagina dell'**Università degli Studi di Napoli Federico II** nel minor numero di click e nel minor tempo possibile.
 
@@ -124,6 +126,7 @@ npx prisma db push
 npx prisma db seed   # Popola 10 utenti e 20 partite di test
 npm run dev
 ```
+> 📖 **OpenAPI & Swagger UI:** A server avviato, la documentazione interattiva è accessibile su `http://localhost:3001/api/docs` e la specifica raw su `http://localhost:3001/api/openapi.json`.
 
 ### Terminale 2: Front-end SPA
 ```bash
@@ -132,11 +135,17 @@ npm install
 npm run dev
 ```
 
+### 🔄 Generazione Contratti & Tipi (OpenAPI Codegen)
+Per rigenerare i contratti OpenAPI e sincronizzare automaticamente i tipi TypeScript del frontend:
+```bash
+npm run codegen
+```
+
 ---
 
 ## 🧪 3. Esecuzione dei Test Automatizzati
 
-### ⚙️ Test di Backend (Vitest — 53 Test)
+### ⚙️ Test di Backend (Vitest — 58 Test)
 ```bash
 cd backend
 npm test
@@ -178,6 +187,7 @@ npx playwright test
 ├───────────────────┬────────────────────────────────────────────────────┤
 │ Front-end SPA     │ React 18.3, TypeScript 5.8, Vite 5, Tailwind 3.4   │
 │ Back-end API      │ Node.js 24 LTS, Express 5.2, TypeScript (Strict)   │
+│ API Contracts     │ OpenAPI 3.0, Swagger UI, openapi-typescript codegen│
 │ Cloud Database    │ Supabase (PostgreSQL 16) con Connection Pooler     │
 │ Database Indexes  │ Indici compositi su Game(userId, status), GameStep │
 │ Cloud Hosting     │ Vercel (Frontend) + Render.com (Backend)           │
@@ -185,7 +195,7 @@ npx playwright test
 │ Security & Anti-XSS│ Sanitize-HTML, Helmet, Rate Limiting, Bcrypt, JWT  │
 │ Network & Proxy   │ Express trust proxy (accurata lettura IP client)  │
 │ Caching Layer     │ LRU Cache In-Memory (TTL 1h, latenza < 1ms)        │
-│ Test Runner       │ Vitest 4.1 (53/53 passed) + Playwright (19/19)     │
+│ Test Runner       │ Vitest 4.1 (58/58 passed) + Playwright (19/19)     │
 │ CI/CD Pipeline    │ GitHub Actions Workflows (.github/workflows)       │
 └───────────────────┴────────────────────────────────────────────────────┘
 ```

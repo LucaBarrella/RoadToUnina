@@ -56,7 +56,16 @@ rsync -av \
   --exclude="*.log" \
   "${WORKSPACE_DIR}/frontend" "${STAGE_DIR}/"
 
-# Copia facoltativa ma preziosa per docker compose: docker-compose.yml nella root
+# Copia file radice preziosi per la corretta esecuzione del monorepo e contratti
+if [ -f "${WORKSPACE_DIR}/package.json" ]; then
+  cp "${WORKSPACE_DIR}/package.json" "${STAGE_DIR}/"
+fi
+if [ -f "${WORKSPACE_DIR}/package-lock.json" ]; then
+  cp "${WORKSPACE_DIR}/package-lock.json" "${STAGE_DIR}/"
+fi
+if [ -f "${WORKSPACE_DIR}/openapi.json" ]; then
+  cp "${WORKSPACE_DIR}/openapi.json" "${STAGE_DIR}/"
+fi
 if [ -f "${WORKSPACE_DIR}/docker-compose.yml" ]; then
   cp "${WORKSPACE_DIR}/docker-compose.yml" "${STAGE_DIR}/"
 fi

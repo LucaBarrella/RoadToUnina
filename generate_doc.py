@@ -133,8 +133,8 @@ def create_delivery_pdf(output_path):
         ],
         [
             Paragraph("<b>Back-end REST API</b>", cell_label),
-            Paragraph("Node.js, Express.js 5, TypeScript (strict mode), Prisma ORM, pg.Pool (connection pool), JWT (HMAC SHA-256), Bcrypt, Helmet, CORS, Zod, lru-cache.", cell_value),
-            Paragraph("• Architettura Layered (Router, Controller, Service)<br/>• Anti-Cheat & OCC Concurrency (HTTP 409)<br/>• <b>Vitest: 53 test automatici passati (100%)</b><br/>• Container Docker multi-stage & Render.com", cell_value)
+            Paragraph("Node.js, Express.js 5, TypeScript (strict mode), OpenAPI 3.0 (Swagger UI), Prisma ORM, pg.Pool (connection pool), JWT (HMAC SHA-256), Bcrypt, Helmet, CORS, Zod, lru-cache.", cell_value),
+            Paragraph("• Architettura Layered & Contract-Driven (OpenAPI)<br/>• Anti-Cheat & OCC Concurrency (HTTP 409)<br/>• <b>Vitest: 58 test automatici passati (100%)</b><br/>• Container Docker multi-stage & Render.com", cell_value)
         ],
         [
             Paragraph("<b>Front-end SPA</b>", cell_label),
