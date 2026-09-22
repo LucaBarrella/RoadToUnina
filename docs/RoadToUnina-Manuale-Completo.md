@@ -175,7 +175,8 @@ Esaminiamo i file di configurazione fondamentali alla base dell'intera infrastru
   "scripts": {
     "build": "npm run build --prefix frontend",
     "dev": "npm run dev --prefix frontend",
-    "start": "npm run start --prefix backend"
+    "start": "npm run start --prefix backend",
+    "codegen": "npm run codegen --prefix backend"
   }
 }
 ```
@@ -266,6 +267,7 @@ export default defineConfig({
 * **Riga 9: `"build": "npm run build --prefix frontend"`**: Esegue il comando di compilazione e bundling entrando virtualmente nella sottocartella `frontend`. Il flag `--prefix` evita all'operatore di dover eseguire manualmente `cd frontend`.
 * **Riga 10: `"dev": "npm run dev --prefix frontend"`**: Lancia il server di sviluppo locale del frontend richiamando lo script `dev` specificato in `frontend/package.json`.
 * **Riga 11: `"start": "npm run start --prefix backend"`**: Avvia il server di produzione backend indirizzando il comando al package presente in `backend/`.
+* **Riga 12: `"codegen": "npm run codegen --prefix backend"`**: Esegue la pipeline di generazione contrattuale automatica: esporta la specifica formale `openapi.json` dal backend e ricompila istantaneamente i tipi TypeScript per il frontend (`api.generated.ts`) tramite `openapi-typescript`.
 
 ---
 
