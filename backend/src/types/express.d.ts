@@ -26,4 +26,6 @@ declare global {
   }
 }
 
+declare module 'swagger-ui-express';
+
 export {};
