@@ -14,18 +14,18 @@ DOCS_DIR = "docs"
 MD_FILE = os.path.join(DOCS_DIR, "RoadToUnina-Manuale-Completo.md")
 PDF_FILE = os.path.join(DOCS_DIR, "RoadToUnina-Manuale-Completo-Dark.pdf")
 
-# Dark Palette (Mini-LED / OLED optimized: pitch dark background, low-power emission)
-BG_COLOR = colors.HexColor('#090D16')        # Deep OLED Navy / Black
+# Dark Palette (Mini-LED / OLED: true black #000000 / deep dark #080C14)
+BG_COLOR = colors.HexColor('#080C14')        # Deep OLED Canvas
 HEADER_LINE = colors.HexColor('#1E293B')    # Muted dark border
 TEXT_MUTED = colors.HexColor('#94A3B8')     # Slate 400
-TEXT_MAIN = colors.HexColor('#E2E8F0')      # Slate 200 (high contrast, zero glare)
+TEXT_MAIN = colors.HexColor('#F1F5F9')      # Slate 100 (Bright, clear, ultra-readable)
 HEADING_1 = colors.HexColor('#38BDF8')      # Sky 400
 HEADING_2 = colors.HexColor('#FACC15')      # Neo Yellow / Amber 400
 HEADING_3 = colors.HexColor('#34D399')      # Emerald 400
 CODE_BG = colors.HexColor('#0F172A')        # Dark Slate Box
 CODE_BORDER = colors.HexColor('#334155')    # Slate 700
 CODE_TEXT = colors.HexColor('#38BDF8')      # Cyan / Sky Code text
-QUOTE_BG = colors.HexColor('#131D31')       # Subtle Blue Tint
+QUOTE_BG = colors.HexColor('#0F1D32')       # Subtle Blue Tint
 QUOTE_BAR = colors.HexColor('#38BDF8')      # Sky Left Bar
 
 class DarkNumberedCanvas(canvas.Canvas):
@@ -41,17 +41,9 @@ class DarkNumberedCanvas(canvas.Canvas):
         num_pages = len(self._saved_page_states)
         for state in self._saved_page_states:
             self.__dict__.update(state)
-            self.draw_dark_background()
             self.draw_page_decorations(num_pages)
             super().showPage()
         super().save()
-
-    def draw_dark_background(self):
-        self.saveState()
-        self.setFillColor(BG_COLOR)
-        # Cover full A4 page
-        self.rect(0, 0, 595.27, 841.89, fill=1, stroke=0)
-        self.restoreState()
 
     def draw_page_decorations(self, page_count):
         if self._pageNumber == 1:
@@ -73,6 +65,13 @@ class DarkNumberedCanvas(canvas.Canvas):
         self.drawString(45, 33, "Candidato: Luca Barrella (N86004677) | Docente: Prof. L.L.L. Starace")
         self.drawRightString(550, 33, f"Pagina {self._pageNumber} di {page_count}")
         self.restoreState()
+
+def draw_background(canvas_obj, doc):
+    """Draws deep dark background BEFORE any Flowable text is placed."""
+    canvas_obj.saveState()
+    canvas_obj.setFillColor(BG_COLOR)
+    canvas_obj.rect(0, 0, 595.27, 841.89, fill=1, stroke=0)
+    canvas_obj.restoreState()
 
 def clean_inline_formatting(text):
     code_matches = []
@@ -318,7 +317,7 @@ def build_dark_pdf():
         i += 1
 
     print("⚙️ Compilazione del documento PDF Dark Mode con DarkNumberedCanvas...")
-    doc.build(story, canvasmaker=DarkNumberedCanvas)
+    doc.build(story, canvasmaker=DarkNumberedCanvas, onFirstPage=draw_background, onLaterPages=draw_background)
     print(f"🎉 Compilazione terminata con successo! PDF Dark Mode creato in: {PDF_FILE}")
 
 if __name__ == '__main__':
