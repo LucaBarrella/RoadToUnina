@@ -26,12 +26,13 @@ Con la presente invio l'elaborato progettuale per l'esame di Tecnologie Web (A.A
 
 L'applicazione è inoltre consultabile e testabile direttamente online tramite i seguenti link di produzione:
 - Demo Live Frontend: https://road-to-unina.vercel.app
-- Backend REST API: https://roadtounina-backend.onrender.com/api (Health: https://roadtounina-backend.onrender.com/api/public/leaderboard)
+- Backend REST API: https://roadtounina-backend.onrender.com/api
+- Documentazione Interattiva OpenAPI (Swagger UI): https://roadtounina-backend.onrender.com/api/docs
 
 L'archivio ZIP allegato (N86004677-Luca-Barrella.zip) contiene:
 1. Il documento di sintesi (doc_consegna.pdf, esattamente 1 pagina);
 2. I sorgenti organizzati nelle directory /backend e /frontend (rigorosamente privi di node_modules, build artifacts, dipendenze pesanti e file temporanei di sistema);
-3. Il README.md con le istruzioni dettagliate per l'esecuzione locale tramite Docker Compose (docker compose up --build).
+3. La specifica formale openapi.json e il README.md con le istruzioni dettagliate per l'esecuzione locale tramite Docker Compose (docker compose up --build).
 
 Resto a Sua completa disposizione per la discussione dell'elaborato.
 
