@@ -108,7 +108,7 @@ export const HUDBar: React.FC<HUDBarProps> = ({
           <Button
             variant="danger"
             size="sm"
-            icon="flag"
+            icon="logout"
             onClick={onAbandon}
             aria-label="Abbandona la partita attuale"
             title="Abbandona la partita attuale (resa)"
