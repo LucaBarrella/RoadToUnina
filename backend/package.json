@@ -9,7 +9,9 @@
     "start": "node dist/server.js",
     "test": "NODE_ENV=test vitest run",
     "seed": "tsx prisma/seed.ts",
-    "prisma:seed": "prisma db seed"
+    "prisma:seed": "prisma db seed",
+    "openapi:export": "tsx scripts/exportOpenApi.ts",
+    "codegen": "npm run openapi:export && openapi-typescript ../openapi.json -o ../frontend/src/types/api.generated.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -41,11 +43,14 @@
     "pg": "^8.23.0",
     "prisma": "^7.9.1",
     "sanitize-html": "^2.17.6",
+    "swagger-ui-express": "^5.0.1",
     "typescript": "^5.8.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/supertest": "^7.2.1",
+    "@types/swagger-ui-express": "^4.1.8",
+    "openapi-typescript": "^7.13.0",
     "supertest": "^7.2.2",
     "tsx": "^4.23.12",
     "vitest": "^4.1.10"

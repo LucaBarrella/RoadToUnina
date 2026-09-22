@@ -11,6 +11,8 @@ import { errorMiddleware, AppError } from './middlewares/errorMiddleware';
 import { ErrorCode } from './constants/errorCodes';
 import { prisma } from './config/db';
 import { IS_PRODUCTION, IS_TEST, PORT, ALLOWED_ORIGINS } from './config/env';
+import swaggerUi from 'swagger-ui-express';
+import { openApiSpec } from './config/openApiSpec';
 
 /**
  * Rate limiting middleware for authentication endpoints (/api/auth).
@@ -101,6 +103,13 @@ export const createApp = (): Express => {
       timestamp: new Date().toISOString(),
     });
   });
+
+  // OpenAPI Documentation & Swagger UI
+  app.get('/api/openapi.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(openApiSpec);
+  });
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
   app.use('/api/auth', authLimiter, authRoutes);
   app.use('/api/games', gameLimiter, gameRoutes);
