@@ -231,6 +231,13 @@ export const createApp = (): Express => {
     });
   });
 
+  // OpenAPI Documentation & Swagger UI
+  app.get('/api/openapi.json', (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(openApiSpec);
+  });
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+
   app.use('/api/auth', authLimiter, authRoutes);
   app.use('/api/games', gameLimiter, gameRoutes);
   app.use('/api/public', publicLimiter, publicRoutes);
@@ -289,7 +296,8 @@ export const createApp = (): Express => {
 * **Riga 93: `app.use(cors(corsOptions));`**: Registra il middleware CORS all'inizio della pipeline per gestire le richieste pre-flight (`OPTIONS`) prima che raggiungano i router.
 * **Riga 94: `app.use(express.json());`**: Body parser integrato basato su `body-parser`. Analizza lo stream dei dati in ingresso aventi `Content-Type: application/json` e popola l'oggetto `req.body` come dizionario JavaScript.
 * **Righe 97-103: `app.get('/api/health', ...)`**: Endpoint di monitoraggio (*Liveness Probe*) per orchestratori cloud (es. Render, Kubernetes). Non interroga il database per minimizzare il consumo di risorse e risponde con lo stato di salute, l'uptime del processo e il timestamp UTC.
-* **Righe 105-107: `app.use('/api/auth', authLimiter, authRoutes); ...`**: Montaggio dei sub-router modulari associando a ciascuno il rispettivo rate-limiter dedicato.
+* **Righe 105-110: `app.get('/api/openapi.json', ...)` e `app.use('/api/docs', ...)`**: Esposizione formale della specifica OpenAPI 3.0 e montaggio dell'interfaccia interattiva **Swagger UI**. Consente l'ispezione visiva dei contratti API, il testing live delle richieste e funge da fonte di verità per la code-generation automatica dei tipi TypeScript sul frontend (`openapi-typescript`).
+* **Righe 112-114: `app.use('/api/auth', authLimiter, authRoutes); ...`**: Montaggio dei sub-router modulari associando a ciascuno il rispettivo rate-limiter dedicato.
 * **Righe 110-115: `app.use((_req, res) => { ... 404 });`**: Middleware "catch-all" per route non definite. Poiché è posizionato dopo tutti i router validi, qualsiasi richiesta a un percorso inesistente viene intercettata e riceve una risposta standardizzata JSON con status `404 Not Found`.
 * **Riga 117: `app.use(errorMiddleware);`**: Registrazione finale del middleware di gestione centralizzata degli errori. Deve trovarsi rigorosamente all'ultimo posto nella pipeline.
 
