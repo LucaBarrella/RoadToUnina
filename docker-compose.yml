@@ -37,7 +37,7 @@ services:
       db:
         condition: service_healthy
     command: >
-      sh -c "npx prisma db push && npm run start"
+      sh -c "npx prisma db push --accept-data-loss && npm run start"
 
   frontend:
     build:
