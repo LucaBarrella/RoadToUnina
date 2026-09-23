@@ -147,7 +147,7 @@ def create_delivery_pdf(output_path):
         ],
         [
             Paragraph("OpenAPI Docs & UI:", cell_label), Paragraph('<font color="#0284C7"><u>https://roadtounina-backend.onrender.com/api/docs</u></font>', cell_value),
-            Paragraph("Automated Tests:", cell_label), Paragraph("<b>58 Vitest (100%) + 19 Playwright E2E</b>", cell_value)
+            Paragraph("Automated Tests:", cell_label), Paragraph("<b>58 Vitest (100%) + 20 Playwright E2E</b>", cell_value)
         ]
     ]
 
@@ -188,7 +188,7 @@ def create_delivery_pdf(output_path):
         [
             Paragraph("<b>Presentation Tier<br/>(Front-end SPA)</b>", cell_label),
             Paragraph("React 18.3, TypeScript 5.8 (Strict), Vite 5, Tailwind CSS 3.4, Axios, DOMPurify, React Router 7.", cell_value),
-            Paragraph("• Single Page Application reattiva con design Neo-Brutalism<br/>• Virtual DOM diffing & Event Delegation sui link Wikipedia<br/>• Sanitizzazione XSS rigorosa con DOMPurify<br/>• <b>Playwright: 19 test E2E automatici passati (100%)</b><br/>• Deploy su Vercel Edge Global CDN", cell_value)
+            Paragraph("• Single Page Application reattiva con design Neo-Brutalism<br/>• Virtual DOM diffing & Event Delegation sui link Wikipedia<br/>• Sanitizzazione XSS rigorosa con DOMPurify<br/>• <b>Playwright: 20 test E2E automatici passati (100%)</b><br/>• Deploy su Vercel Edge Global CDN", cell_value)
         ],
         [
             Paragraph("<b>Application Tier<br/>(Back-end REST)</b>", cell_label),
