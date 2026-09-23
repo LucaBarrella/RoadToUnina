@@ -61,6 +61,7 @@ rsync -av \
   --exclude="playwright-report" \
   --exclude="test-results" \
   --exclude="*.tsbuildinfo" \
+  --exclude="netlify.toml" \
   --exclude=".DS_Store" \
   --exclude="._*" \
   --exclude="*.log" \
