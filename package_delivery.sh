@@ -28,12 +28,15 @@ cp "${WORKSPACE_DIR}/doc_consegna.pdf" "${STAGE_DIR}/"
 cp "${WORKSPACE_DIR}/README.md" "${STAGE_DIR}/"
 
 # Elemento 3: /backend pulito
-echo "   -> Copia backend (esclusi node_modules, dist, .env, dev.db, AI skills, cache, doc interne)..."
+echo "   -> Copia backend (esclusi node_modules, dist, .env privati, dev.db, AI skills, cache, doc interne)..."
 rsync -av \
   --exclude="node_modules" \
   --exclude="dist" \
   --exclude=".env" \
-  --exclude=".env.*" \
+  --exclude=".env.local" \
+  --exclude=".env.development" \
+  --exclude=".env.test" \
+  --exclude=".env.production" \
   --exclude="dev.db*" \
   --exclude=".claude" \
   --exclude=".agents" \
@@ -50,12 +53,15 @@ rsync -av \
   "${WORKSPACE_DIR}/backend" "${STAGE_DIR}/"
 
 # Elemento 4: /frontend pulito
-echo "   -> Copia frontend (esclusi node_modules, dist, cache, .env, screenshot, vercel)..."
+echo "   -> Copia frontend (esclusi node_modules, dist, cache, .env privati, screenshot, vercel)..."
 rsync -av \
   --exclude="node_modules" \
   --exclude="dist" \
   --exclude=".env" \
-  --exclude=".env.*" \
+  --exclude=".env.local" \
+  --exclude=".env.development" \
+  --exclude=".env.test" \
+  --exclude=".env.production" \
   --exclude=".vercel" \
   --exclude="e2e-screenshots" \
   --exclude="playwright-report" \

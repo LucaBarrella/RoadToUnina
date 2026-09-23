@@ -26,14 +26,14 @@ export const PORT: number = parseInt(process.env.PORT || '3001', 10);
 export const JWT_SECRET: string = (() => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    if (IS_TEST) {
-      return 'test_super_secret_jwt_key_at_least_32_characters_long_for_vitest';
+    if (IS_TEST || !IS_PRODUCTION) {
+      return 'dev_super_secret_jwt_key_at_least_32_characters_long_for_roadtounina';
     }
     throw new Error('FATAL: JWT_SECRET environment variable is missing.');
   }
   if (secret.length < 32) {
-    if (IS_TEST) {
-      return 'test_super_secret_jwt_key_at_least_32_characters_long_for_vitest';
+    if (IS_TEST || !IS_PRODUCTION) {
+      return 'dev_super_secret_jwt_key_at_least_32_characters_long_for_roadtounina';
     }
     throw new Error('FATAL: JWT_SECRET must be at least 32 characters long.');
   }
