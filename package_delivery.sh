@@ -28,14 +28,19 @@ cp "${WORKSPACE_DIR}/doc_consegna.pdf" "${STAGE_DIR}/"
 cp "${WORKSPACE_DIR}/README.md" "${STAGE_DIR}/"
 
 # Elemento 3: /backend pulito
-echo "   -> Copia backend (esclusi node_modules, dist, .env privati, dev.db, ecc.)..."
+echo "   -> Copia backend (esclusi node_modules, dist, .env, dev.db, AI skills, cache)..."
 rsync -av \
   --exclude="node_modules" \
   --exclude="dist" \
   --exclude=".env" \
-  --exclude=".env.local" \
-  --exclude="dev.db" \
+  --exclude=".env.*" \
   --exclude="dev.db*" \
+  --exclude=".claude" \
+  --exclude=".agents" \
+  --exclude=".windsurf" \
+  --exclude=".prisma" \
+  --exclude="generated" \
+  --exclude="skills-lock.json" \
   --exclude=".DS_Store" \
   --exclude="._*" \
   --exclude="*.log" \
@@ -43,20 +48,23 @@ rsync -av \
   "${WORKSPACE_DIR}/backend" "${STAGE_DIR}/"
 
 # Elemento 4: /frontend pulito
-echo "   -> Copia frontend (esclusi node_modules, dist, playwrigth cache, .env privati, ecc.)..."
+echo "   -> Copia frontend (esclusi node_modules, dist, cache, .env, screenshot, vercel)..."
 rsync -av \
   --exclude="node_modules" \
   --exclude="dist" \
   --exclude=".env" \
-  --exclude=".env.local" \
+  --exclude=".env.*" \
+  --exclude=".vercel" \
+  --exclude="e2e-screenshots" \
   --exclude="playwright-report" \
   --exclude="test-results" \
+  --exclude="*.tsbuildinfo" \
   --exclude=".DS_Store" \
   --exclude="._*" \
   --exclude="*.log" \
   "${WORKSPACE_DIR}/frontend" "${STAGE_DIR}/"
 
-# Copia file radice preziosi per la corretta esecuzione del monorepo e contratti
+# Copia file radice previsti per la corretta esecuzione del monorepo e docker
 if [ -f "${WORKSPACE_DIR}/package.json" ]; then
   cp "${WORKSPACE_DIR}/package.json" "${STAGE_DIR}/"
 fi
