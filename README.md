@@ -11,7 +11,7 @@
 [![React](https://img.shields.io/badge/React-v18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v3.4-38BDF8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 [![Vitest](https://img.shields.io/badge/Vitest-58%2F58%20Passing%20(100%25)-44A833?logo=vitest&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
-[![Playwright E2E](https://img.shields.io/badge/Playwright_E2E-19%2F19%20Passing%20(100%25)-2EAD33?logo=playwright&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
+[![Playwright E2E](https://img.shields.io/badge/Playwright_E2E-20%2F20%20Passing%20(100%25)-2EAD33?logo=playwright&logoColor=white)](#-3-esecuzione-dei-test-automatizzati)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-6BA539?logo=openapiinitiative&logoColor=white)](https://roadtounina-backend.onrender.com/api/docs)
 [![Swagger UI](https://img.shields.io/badge/Swagger_UI-Interactive_Docs-85EA2D?logo=swagger&logoColor=black)](https://roadtounina-backend.onrender.com/api/docs)
 
@@ -150,9 +150,9 @@ npm test
 - **`robustnessQA.test.ts` (25 test):** Validazione Zod, anti-cheat su Wikipedia, isolamento IDOR, race condition atomiche, timeout 24h.
 - **`breakBackend.test.ts` (12 test):** Stress test (20 req simultanee), SQL injection, DoS protection, XSS filtering, JWT security.
 - **`wikiService.test.ts` (8 test):** Parsing MediaWiki, estrazione link Namespace 0, DOM sanitization, caching LRU.
-- **`gameService.test.ts` (8 test):** Ciclo di vita del gioco, transizioni di stato atomiche, vittoria e calcolo path.
+- **`gameService.test.ts` (13 test):** Ciclo di vita del gioco, transizioni di stato atomiche, vittoria e calcolo path.
 
-### 🎭 Test End-to-End (Playwright — 19 Test)
+### 🎭 Test End-to-End (Playwright — 20 Test)
 ```bash
 cd frontend
 npx playwright test
@@ -160,6 +160,7 @@ npx playwright test
 - **`gameplay.spec.ts` (6 test):** Registrazione, login, bot gameplay, speedrun completa, verifica leaderboard, anti-cheat & edge cases.
 - **`live-verification.spec.ts` (1 test):** Resilienza, error recovery da titoli non validi e integrità del flusso.
 - **`speedrun-moonknight.spec.ts` (1 test):** Playtest speedrun completo da *"Moon Knight"* a *"Università degli Studi di Napoli Federico II"*.
+- **`production-full.spec.ts` (1 test):** Verifica end-to-end completa dell'esperienza utente su stack live e isolato.
 - **`thematic-speedruns.spec.ts` (6 test):**
   - 🎬 **Boris (Serie TV)** — *"Dai dai dai!"*: `"Boris (serie televisiva)"` ➔ `"Italia"` ➔ `"Napoli"` ➔ `"Università degli Studi di Napoli Federico II"`
   - 💾 **antirez (Salvatore Sanfilippo)** — `"Redis"` ➔ `"Salvatore Sanfilippo"` ➔ `"Italia"` ➔ `"Napoli"` ➔ `"Unina"`

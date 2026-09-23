@@ -66,6 +66,9 @@ npm test
 
 | Metodo | Endpoint | Accesso | Descrizione |
 | :--- | :--- | :---: | :--- |
+| `GET` | `/api/health` | Pubblico | Health check diagnostico per cloud orchestrator e Docker. |
+| `GET` | `/api/docs/` | Pubblico | Documentazione interattiva Swagger UI (OpenAPI 3.0). |
+| `GET` | `/api/openapi.json` | Pubblico | Specifica raw OpenAPI 3.0 in formato JSON. |
 | `POST` | `/api/auth/register` | Pubblico | Registrazione nuovo utente con password cifrata in bcrypt. |
 | `POST` | `/api/auth/login` | Pubblico | Autenticazione utente ed emissione token JWT. |
 | `GET` | `/api/auth/me` | Protetto | Profilo utente autenticato. |
@@ -75,3 +78,26 @@ npm test
 | `POST` | `/api/games/:id/abandon` | Protetto | Forfeit / abbandono manuale della partita attiva. |
 | `GET` | `/api/public/completed-games` | Pubblico | Storico partite concluse con percorso e tempi. |
 | `GET` | `/api/public/leaderboard` | Pubblico | Classifica globale dei migliori giocatori. |
+
+---
+
+## 📁 Struttura della Directory
+
+```
+backend/
+├── prisma/                  # Schema relazionale Prisma e seed di popolamento
+│   ├── schema.prisma
+│   └── seed.ts
+├── src/
+│   ├── __tests__/           # Suite di test automatizzati Vitest (58 test)
+│   ├── config/              # Configurazione DB, pooler, env e OpenAPI
+│   ├── constants/           # Codici di errore standardizzati
+│   ├── middlewares/         # Pipeline middleware (Auth JWT, Zod validation, Error)
+│   ├── routes/              # Express Router (auth, games, public)
+│   ├── services/            # Business logic (Wikipedia client, anti-cheat, sessioni)
+│   ├── types/               # Definizioni TypeScript globali (Express request user)
+│   └── server.ts            # Entry point dell'applicazione Express
+├── Dockerfile               # Configurazione multi-stage container Docker
+├── package.json             # Descrittore dipendenze e script npm
+└── tsconfig.json            # Configurazione TypeScript (strict mode)
+```

@@ -60,9 +60,13 @@ npx playwright test e2e/ux-accessibility.spec.ts
 
 ```
 frontend/
-├── e2e/                     # Suite di test Playwright E2E
-│   ├── gameplay.spec.ts     # 6 test E2E completi
-│   └── speedrun-moonknight.spec.ts # Test playtest Moon Knight -> Unina
+├── e2e/                     # Suite di test Playwright E2E (20 test)
+│   ├── gameplay.spec.ts     # Test gameplay, registrazione, login e anti-cheat
+│   ├── thematic-speedruns.spec.ts # Speedrun tematiche (Boris, antirez, AI, Totò, ecc.)
+│   ├── ux-accessibility.spec.ts   # Session persistence, guest mode, keyboard e accessibilità
+│   ├── speedrun-moonknight.spec.ts# Playtest speedrun Moon Knight -> Unina
+│   ├── live-verification.spec.ts  # Test error recovery e resilienza
+│   └── production-full.spec.ts    # Test navigazione e integrazione completa
 ├── public/                  # Asset statici e favicon
 ├── src/
 │   ├── api/                 # Client Axios centralizzato (auth, game, public)
@@ -73,6 +77,8 @@ frontend/
 │   ├── pages/               # Viste SPA (HomePage, GamePage, LeaderboardPage, LoginPage, RegisterPage)
 │   ├── styles/              # Token e classi CSS Neo-Brutalism
 │   └── types/               # Definizioni TypeScript per API, entità e stato
-├── vercel.json              # Configurazione rewrite SPA per Vercel
+├── Dockerfile               # Configurazione multi-stage con Nginx alpine
+├── nginx.conf               # Configurazione Nginx con reverse proxy API
+├── package.json             # Descrittore dipendenze e script npm
 └── vite.config.ts           # Configurazione bundler Vite
 ```
