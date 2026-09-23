@@ -6,10 +6,6 @@
 
 API RESTful per la piattaforma di speedrunning enciclopedico **RoadToUnina** sviluppata con **Node.js**, **Express 5**, **TypeScript**, **Prisma ORM v7** e **PostgreSQL** (driver `@prisma/adapter-pg` con Supabase connection pooling).
 
-> 📄 **Requisiti d'Esame:** [REQUIREMENTS.md](../REQUIREMENTS.md)  
-> 📖 **Specifiche Architetturali:** [ARCHITECTURE.md](./ARCHITECTURE.md) (Diagrammi UML, Casi d'Uso, Macchina a Stati, ER, Sequenza, OCC & Anti-Cheat)  
-> 🔍 **Walkthrough Codice:** [CODE_WALKTHROUGH.md](./CODE_WALKTHROUGH.md) (Analisi approfondita dei sorgenti backend)
-
 ---
 
 ## 👨‍🎓 Progetto & Studente

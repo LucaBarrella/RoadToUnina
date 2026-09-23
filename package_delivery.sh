@@ -28,7 +28,7 @@ cp "${WORKSPACE_DIR}/doc_consegna.pdf" "${STAGE_DIR}/"
 cp "${WORKSPACE_DIR}/README.md" "${STAGE_DIR}/"
 
 # Elemento 3: /backend pulito
-echo "   -> Copia backend (esclusi node_modules, dist, .env, dev.db, AI skills, cache)..."
+echo "   -> Copia backend (esclusi node_modules, dist, .env, dev.db, AI skills, cache, doc interne)..."
 rsync -av \
   --exclude="node_modules" \
   --exclude="dist" \
@@ -41,6 +41,8 @@ rsync -av \
   --exclude=".prisma" \
   --exclude="generated" \
   --exclude="skills-lock.json" \
+  --exclude="ARCHITECTURE.md" \
+  --exclude="CODE_WALKTHROUGH.md" \
   --exclude=".DS_Store" \
   --exclude="._*" \
   --exclude="*.log" \
