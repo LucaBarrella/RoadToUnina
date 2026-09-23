@@ -18,10 +18,7 @@
 Elaborato progettuale e implementazione full-stack per la traccia d'esame **RoadToUnina**: una piattaforma web competitiva in cui gli utenti registrati avviano una sfida partendo da una voce casuale estratta in tempo reale da Wikipedia e navigano, **esclusivamente attraverso i collegamenti ipertestuali interni verificati dal server**, per raggiungere la pagina dell'**Università degli Studi di Napoli Federico II** nel minor numero di click e nel minor tempo possibile.
 
 > 🌐 **Live Cloud Demo:** [https://road-to-unina.vercel.app](https://road-to-unina.vercel.app)  
-> 📄 **Requisiti Ufficiali:** Consulta il documento [REQUIREMENTS.md](./REQUIREMENTS.md) per i requisiti d'esame e le linee guida didattiche.  
-> 🚀 **Guida Deployment:** Consulta [DEPLOYMENT.md](./DEPLOYMENT.md) per le istruzioni di deploy continuo e configurazione cloud.  
-> 🛡️ **Specifiche Architetturali:** Consulta [backend/ARCHITECTURE.md](./backend/ARCHITECTURE.md) per i diagrammi UML (Casi d'Uso, Macchina a Stati, ER, Sequenza), OCC e matrice di tracciabilità.  
-> 🔍 **Walkthrough Codice:** Consulta [backend/CODE_WALKTHROUGH.md](./backend/CODE_WALKTHROUGH.md) per l'analisi approfondita del sorgente backend.
+> 📄 **Requisiti Ufficiali:** Consulta il documento [REQUIREMENTS.md](./REQUIREMENTS.md) per i requisiti d'esame e le linee guida didattiche.
 
 ---
 

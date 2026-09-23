@@ -2,7 +2,7 @@
 
 [![Live API](https://img.shields.io/badge/Live_API-Render.com-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://roadtounina-backend.onrender.com/api/public/leaderboard)
 [![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
-[![Vitest Tests](https://img.shields.io/badge/Vitest-53%2F53%20Passing%20(100%25)-44A833?style=for-the-badge&logo=vitest&logoColor=white)](#-esecuzione-dei-test-automatizzati)
+[![Vitest Tests](https://img.shields.io/badge/Vitest-58%2F58%20Passing%20(100%25)-44A833?style=for-the-badge&logo=vitest&logoColor=white)](#-esecuzione-dei-test-automatizzati)
 
 API RESTful per la piattaforma di speedrunning enciclopedico **RoadToUnina** sviluppata con **Node.js**, **Express 5**, **TypeScript**, **Prisma ORM v7** e **PostgreSQL** (driver `@prisma/adapter-pg` con Supabase connection pooling).
 
@@ -36,7 +36,7 @@ docker compose up --build
 cd backend
 npm install
 npx prisma generate
-npx prisma db push
+npx prisma db push --accept-data-loss
 npx prisma db seed   # Popola 10 utenti e 20 partite storiche
 npm run dev
 ```
@@ -47,7 +47,7 @@ Il server sarà attivo su: **`http://localhost:3001`**.
 
 ## 🧪 Esecuzione dei Test Automatizzati
 
-Il backend include **53 test automatizzati** (unitari, di integrazione, concorrenza, anti-cheat e sicurezza):
+Il backend include **58 test automatizzati** (unitari, di integrazione, concorrenza, anti-cheat e sicurezza):
 
 ```bash
 cd backend
@@ -58,7 +58,7 @@ npm test
 - **`robustnessQA.test.ts` (25 test):** Validazione Zod, anti-cheat su Wikipedia, isolamento IDOR, race condition atomiche, timeout 24h.
 - **`breakBackend.test.ts` (12 test):** Stress test (20 req simultanee), SQL injection, DoS protection, XSS filtering, JWT security.
 - **`wikiService.test.ts` (8 test):** Parsing MediaWiki, estrazione link Namespace 0, DOM sanitization, caching LRU.
-- **`gameService.test.ts` (8 test):** Ciclo di vita del gioco, transizioni di stato atomiche, vittoria e calcolo path.
+- **`gameService.test.ts` (13 test):** Ciclo di vita del gioco, transizioni di stato atomiche, vittoria e calcolo path.
 
 ---
 
