@@ -95,6 +95,23 @@ export const createApp = (): Express => {
   app.use(cors(corsOptions));
   app.use(express.json());
 
+  // Root and /api entrypoint: Welcome & API Navigation
+  app.get(['/', '/api'], (_req, res) => {
+    res.status(200).json({
+      name: 'RoadToUnina API',
+      version: '1.0.0',
+      description: 'Wikipedia Speedrun REST API per Università degli Studi di Napoli Federico II',
+      documentation: '/api/docs/',
+      specification: '/api/openapi.json',
+      health: '/api/health',
+      endpoints: {
+        auth: '/api/auth',
+        games: '/api/games',
+        public: '/api/public'
+      }
+    });
+  });
+
   // Health check endpoint (lightweight, zero DB overhead for cloud orchestrators / Render)
   app.get('/api/health', (_req, res) => {
     res.status(200).json({

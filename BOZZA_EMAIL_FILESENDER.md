@@ -27,7 +27,7 @@ Con la presente invio l'elaborato progettuale per l'esame di Tecnologie Web (A.A
 L'applicazione è inoltre consultabile e testabile direttamente online tramite i seguenti link di produzione:
 - Demo Live Frontend: https://road-to-unina.vercel.app
 - Backend REST API: https://roadtounina-backend.onrender.com/api
-- Documentazione Interattiva OpenAPI (Swagger UI): https://roadtounina-backend.onrender.com/api/docs
+- Documentazione Interattiva OpenAPI (Swagger UI): https://roadtounina-backend.onrender.com/api/docs/
 
 L'archivio ZIP allegato (N86004677-Luca-Barrella.zip) contiene:
 1. Il documento di sintesi (doc_consegna.pdf, esattamente 1 pagina);
