@@ -96,7 +96,7 @@ export const createApp = (): Express => {
   app.use(express.json());
 
   // Root and /api entrypoint: Welcome & API Navigation
-  app.get(['/', '/api'], (_req, res) => {
+  const sendWelcome = (_req: express.Request, res: express.Response) => {
     res.status(200).json({
       name: 'RoadToUnina API',
       version: '1.0.0',
@@ -110,7 +110,10 @@ export const createApp = (): Express => {
         public: '/api/public'
       }
     });
-  });
+  };
+
+  app.get('/', sendWelcome);
+  app.get('/api', sendWelcome);
 
   // Health check endpoint (lightweight, zero DB overhead for cloud orchestrators / Render)
   app.get('/api/health', (_req, res) => {
