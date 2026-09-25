@@ -71,7 +71,7 @@ sequenceDiagram
     Dev->>Git: git push origin main
     par Continuous Integration
         Git->>GHA: Trigger Workflow CI/CD
-        GHA->>GHA: Test Unitari (53 Vitest) + Build + Test E2E (18 Playwright)
+        GHA->>GHA: Test Unitari (58 Vitest) + Build + Test E2E (20 Playwright)
     and Continuous Deployment
         Git->>Ren: Webhook Auto-Deploy Backend
         Ren->>Ren: npm ci --include=dev && npx prisma generate && npm run build
@@ -90,7 +90,7 @@ git push origin main
 ```
 - **Render.com** rileva il commit, compila il backend e lo aggiorna in ~60 secondi senza downtime.
 - **Vercel** compila il frontend e aggiorna la CDN globale in ~30 secondi.
-- **GitHub Actions** esegue automaticamente la suite di 53 test backend e 18 test E2E Playwright.
+- **GitHub Actions** esegue automaticamente la suite di 58 test backend e 20 test E2E Playwright.
 
 ---
 
