@@ -14,12 +14,44 @@ interface SeedGameDefinition {
 async function main() {
   console.log('🌱 Starting comprehensive database seeding for RoadToUnina...');
 
-  // 1. Clean existing test/seed data
-  await prisma.gameStep.deleteMany({});
-  await prisma.game.deleteMany({});
-  await prisma.user.deleteMany({});
+  // 1. SAFE SEED GUARD: Never wipe existing real user data!
+  const demoUsernames = [
+    'unina_runner',
+    'speedrunner_napoli',
+    'wiki_master',
+    'claudia_fed2',
+    'mario_rossi',
+    'gennaro_speed',
+    'lucia_bytes',
+    'antonio_unina',
+    'sofia_traveler',
+    'marco_neobrutal',
+  ];
 
-  console.log('🧹 Cleaned existing tables (GameStep, Game, User).');
+  const existingDemoUsers = await prisma.user.findMany({
+    where: { username: { in: demoUsernames } },
+    select: { id: true },
+  });
+
+  if (existingDemoUsers.length > 0) {
+    const demoUserIds = existingDemoUsers.map((u) => u.id);
+    const demoGames = await prisma.game.findMany({
+      where: { userId: { in: demoUserIds } },
+      select: { id: true },
+    });
+    const demoGameIds = demoGames.map((g) => g.id);
+
+    await prisma.gameStep.deleteMany({
+      where: { gameId: { in: demoGameIds } },
+    });
+    await prisma.game.deleteMany({
+      where: { id: { in: demoGameIds } },
+    });
+    await prisma.user.deleteMany({
+      where: { id: { in: demoUserIds } },
+    });
+    console.log('🧹 Cleaned existing simulated demo users (real users preserved!).');
+  }
 
   // 2. Create password hash for all seed users
   const defaultPassword = await bcrypt.hash('Password123!', 10);
